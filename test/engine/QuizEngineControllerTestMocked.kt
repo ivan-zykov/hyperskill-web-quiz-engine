@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 @SpringBootTest
 @AutoConfigureMockMvc
 class QuizEngineControllerTestMocked @Autowired constructor(private val mockMvc: MockMvc) {
+    //    todo: move to not-mocked tests
     @Test
     fun `POST quiz returns OK for correct answer`() {
         mockMvc.perform(post("/api/quiz?answer=2"))

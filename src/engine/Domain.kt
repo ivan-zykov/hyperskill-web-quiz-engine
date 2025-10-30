@@ -6,7 +6,7 @@ class Quiz(
     val options: List<String>,
 )
 
-class AnswerResult(
+data class AnswerResult(
     val success: Boolean,
     val feedback: String
 )

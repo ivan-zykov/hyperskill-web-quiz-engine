@@ -2,6 +2,9 @@ package engine
 
 import org.springframework.stereotype.Service
 
+private const val CONGRATULATIONS = "Congratulations, you're right!"
+private const val WRONG_ANSWER = "Wrong answer! Please, try again."
+
 @Suppress("unused")
 @Service
 class InMemoryQuizService : QuizService {
@@ -12,7 +15,16 @@ class InMemoryQuizService : QuizService {
     )
 
     override fun checkAnswer(answerIdx: Int): AnswerResult {
-        TODO("Not yet implemented")
+        val (success, feedback) = if (answerIdx == 2) {
+            true to CONGRATULATIONS
+        } else {
+            false to WRONG_ANSWER
+        }
+
+        return AnswerResult(
+            success = success,
+            feedback = feedback,
+        )
     }
 
 }
