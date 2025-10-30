@@ -21,7 +21,6 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
 
     @PostMapping("/quiz")
     fun answerQuiz(@RequestParam answer: Int): ResponseEntity<ResultDto> {
-//        todo: handle exception with missing request param
         val result = quizService.checkAnswer(answerIdx = answer)
 
         return ResponseEntity
