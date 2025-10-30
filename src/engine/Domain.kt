@@ -5,3 +5,8 @@ class Quiz(
     val text: String,
     val options: List<String>,
 )
+
+class AnswerResult(
+    val success: Boolean,
+    val feedback: String
+)

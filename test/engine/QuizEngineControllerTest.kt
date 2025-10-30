@@ -25,4 +25,15 @@ class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockM
             .andExpect(jsonPath("$.options[2]").value("Cup of coffee"))
             .andExpect(jsonPath("$.options[3]").value("Bug"))
     }
+
+//    @TestConfiguration
+//    class TestBeans {
+//        @Bean
+//        fun quizService(): InMemoryQuizService =
+//    }
+
+    @Test
+    fun `POST quiz returns OK for correct answer`() {
+
+    }
 }
