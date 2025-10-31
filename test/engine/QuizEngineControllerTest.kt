@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @SpringBootTest
@@ -24,6 +25,15 @@ class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockM
             .andExpect(jsonPath("$.options[1]").value("Tea leaf"))
             .andExpect(jsonPath("$.options[2]").value("Cup of coffee"))
             .andExpect(jsonPath("$.options[3]").value("Bug"))
+    }
+
+    @Test
+    fun `POST quiz returns OK for correct answer`() {
+        mockMvc.perform(post("/api/quiz?answer=2"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.feedback").value("Congratulations, you're right!"))
     }
 
 }
