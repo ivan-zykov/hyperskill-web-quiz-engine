@@ -1,6 +1,8 @@
 package engine
 
+import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,6 +36,19 @@ class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockM
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.feedback").value("Congratulations, you're right!"))
+    }
+
+    @TestFactory
+    fun `POST quiz returns Bad request with`() = listOf(
+        "",
+        "a=2",
+    ).map { requestParam ->
+        dynamicTest("request param: $requestParam") {
+            mockMvc.perform(post("/api/quiz?$requestParam"))
+                .andExpect(status().isBadRequest)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").isString)
+        }
     }
 
 }
