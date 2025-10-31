@@ -13,7 +13,7 @@ class InMemoryQuizServiceTest {
         2 to AnswerResult(success = true, feedback = CONGRATULATIONS),
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
-        dynamicTest("answer $answerIdx") {
+        dynamicTest("answer $answerIdx is ${expected.success}") {
             val sut = InMemoryQuizService()
 
             val actual = sut.checkAnswer(answerIdx)
