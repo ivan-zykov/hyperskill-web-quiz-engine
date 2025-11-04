@@ -1,6 +1,8 @@
 package engine
 
 import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
@@ -26,6 +28,12 @@ class InMemoryQuizService : QuizService {
             success = success,
             feedback = feedback,
         )
+    }
+
+    private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
+
+    override fun addQuiz(quiz: Quiz): Pair<Int, Quiz> {
+        TODO("Not yet implemented")
     }
 
 }

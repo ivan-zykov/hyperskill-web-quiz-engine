@@ -28,16 +28,33 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
             .contentType(MediaType.APPLICATION_JSON)
             .body(result.toDto())
     }
-}
 
-private fun Quiz.toDto() = QuizOutDto(
-    id = id,
-    title = title,
-    text = text,
-    options = options,
-)
+    @PostMapping("/quizzes")
+    fun addQuiz(@RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
+        val createdIdToQuiz = quizService.addQuiz(quiz.toDomain())
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(createdIdToQuiz.toDto())
+    }
+}
 
 private fun AnswerResult.toDto() = ResultDto(
     success = success,
     feedback = feedback,
+)
+
+private fun QuizInDto.toDomain() = Quiz(
+    title = title,
+    text = text,
+    options = options,
+    answer = answer,
+)
+
+private fun Pair<Int, Quiz>.toDto() = QuizOutDto(
+    id = first,
+    title = second.title,
+    text = second.text,
+    options = second.options,
 )

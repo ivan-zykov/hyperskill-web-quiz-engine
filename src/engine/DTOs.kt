@@ -13,3 +13,11 @@ class ResultDto(
     val success: Boolean,
     val feedback: String
 )
+
+@Suppress("unused")
+class QuizInDto(
+    val title: String,
+    val text: String,
+    val options: List<String>,
+    val answer: Int,
+)
