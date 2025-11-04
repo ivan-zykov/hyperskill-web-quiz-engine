@@ -1,7 +1,8 @@
 package engine
 
 @Suppress("unused")
-class QuizDto (
+class QuizOutDto(
+    val id: Int,
     val title: String,
     val text: String,
     val options: List<String>,

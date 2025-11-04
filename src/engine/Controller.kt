@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class QuizEngineController @Autowired constructor(val quizService: QuizService) {
     @GetMapping("/quiz")
-    fun getQuiz(): ResponseEntity<QuizDto> {
-        val quiz = quizService.getQuiz()
+    fun getQuiz(): ResponseEntity<QuizOutDto> {
+        val idToQuiz = quizService.getQuiz()
 
         return ResponseEntity
             .ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(quiz.toDto())
+            .body(idToQuiz.toDto())
     }
 
     @PostMapping("/quiz")
@@ -30,7 +30,8 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
     }
 }
 
-private fun Quiz.toDto() = QuizDto(
+private fun Quiz.toDto() = QuizOutDto(
+    id = id,
     title = title,
     text = text,
     options = options,
