@@ -1,7 +1,7 @@
 package engine
 
 interface QuizService {
-    fun getQuiz(): Pair<Int, Quiz>
+    fun getQuiz(): Pair<UInt, Quiz>
     fun checkAnswer(answerIdx: Int): AnswerResult
-    fun addQuiz(quiz: Quiz): Pair<Int, Quiz>
+    fun addQuiz(quiz: Quiz): Pair<UInt, Quiz>
 }

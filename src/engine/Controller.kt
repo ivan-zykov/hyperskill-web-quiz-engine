@@ -52,7 +52,7 @@ private fun QuizInDto.toDomain() = Quiz(
     answer = answer,
 )
 
-private fun Pair<Int, Quiz>.toDto() = QuizOutDto(
+private fun Pair<UInt, Quiz>.toDto() = QuizOutDto(
     id = first,
     title = second.title,
     text = second.text,

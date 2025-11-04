@@ -1,5 +1,6 @@
 package engine
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -12,12 +13,17 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
+private const val API_PATH = "/api"
+
 @SpringBootTest
 @AutoConfigureMockMvc
-class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockMvc) {
+class QuizEngineControllerTest @Autowired constructor(
+    private val mockMvc: MockMvc,
+    private val mapper: ObjectMapper
+) {
     @Test
     fun `GET quiz returns OK with one quiz`() {
-        mockMvc.perform(get("/api/quiz"))
+        mockMvc.perform(get("$API_PATH/quiz"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.title").value("The Java Logo"))
@@ -31,7 +37,7 @@ class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockM
 
     @Test
     fun `POST quiz returns OK for correct answer`() {
-        mockMvc.perform(post("/api/quiz?answer=2"))
+        mockMvc.perform(post("$API_PATH/quiz?answer=2"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.success").value(true))
@@ -44,11 +50,38 @@ class QuizEngineControllerTest @Autowired constructor(private val mockMvc: MockM
         "a=2",
     ).map { requestParam ->
         dynamicTest("request param: $requestParam") {
-            mockMvc.perform(post("/api/quiz?$requestParam"))
+            mockMvc.perform(post("$API_PATH/quiz?$requestParam"))
                 .andExpect(status().isBadRequest)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").isString)
         }
+    }
+
+    @Test
+    fun `POST quizzes returns OK with created quiz`() {
+        val title = "test title"
+        val text = "test text"
+        val option = "test option"
+        val quiz = QuizInDto(
+            title = title,
+            text = text,
+            options = listOf(option),
+            answer = 0,
+        )
+        val quizSerialized = mapper.writeValueAsString(quiz)
+
+        mockMvc.perform(
+            post("$API_PATH/quizzes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(quizSerialized)
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.title").value(title))
+            .andExpect(jsonPath("$.text").value(text))
+            .andExpect(jsonPath("$.options[0]").value(option))
+            .andExpect(jsonPath("$.answer").doesNotExist())
     }
 
 }
