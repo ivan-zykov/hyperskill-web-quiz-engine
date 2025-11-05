@@ -42,7 +42,7 @@ class InMemoryQuizService : QuizService {
         return newId to createdQuiz
     }
 
-    private fun getQuizWith(newId: UInt) = quizzes[newId]
+    private fun getQuizWith(id: UInt) = quizzes[id]
 
     private fun Quiz.generateId() = title.hashCode().toUInt()
 
