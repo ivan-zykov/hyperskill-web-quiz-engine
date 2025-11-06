@@ -40,7 +40,7 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
     }
 
     @GetMapping("/quizzes/{id}")
-    fun showQuiz(@PathVariable id: Int): ResponseEntity<QuizOutDto> {
+    fun showQuiz(@PathVariable id: UInt): ResponseEntity<QuizOutDto> {
         val quiz = quizService.getQuizWith(id)
 
         return ResponseEntity

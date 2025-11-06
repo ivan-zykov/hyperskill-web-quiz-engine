@@ -36,17 +36,20 @@ class InMemoryQuizService : QuizService {
         val newId = quiz.generateId()
         quizzes.add(newId, quiz)
 
-        val createdQuiz = getQuizWith(newId)
+        val createdQuiz = findQuizWith(newId)
         checkNotNull(createdQuiz) { "Error. Failed to persist new quiz $quiz with id $newId." }
 
         return newId to createdQuiz
     }
 
-    override fun getQuizWith(id: Int): Pair<UInt, Quiz> {
-        TODO("Not yet implemented")
+    override fun getQuizWith(id: UInt): Pair<UInt, Quiz> {
+        val quiz = findQuizWith(id)
+        checkNotNull(quiz) { "Error. Failed to get quiz with id $id." }
+
+        return id to quiz
     }
 
-    private fun getQuizWith(id: UInt) = quizzes[id]
+    private fun findQuizWith(id: UInt) = quizzes[id]
 
     private fun Quiz.generateId() = title.hashCode().toUInt()
 
