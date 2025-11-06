@@ -11,7 +11,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 class InMemoryQuizServiceTest {
     @TestFactory
-    fun `Result for`() = listOf(
+    fun `Checking quiz result for`() = listOf(
         2 to AnswerResult(success = true, feedback = CONGRATULATIONS),
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
