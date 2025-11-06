@@ -38,6 +38,16 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
             .contentType(MediaType.APPLICATION_JSON)
             .body(createdIdToQuiz.toDto())
     }
+
+    @GetMapping("/quizzes/{id}")
+    fun showQuiz(@PathVariable id: Int): ResponseEntity<QuizOutDto> {
+        val quiz = quizService.getQuizWith(id)
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(quiz.toDto())
+    }
 }
 
 private fun AnswerResult.toDto() = ResultDto(

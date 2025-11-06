@@ -7,8 +7,12 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+
+typealias ErrorBody = Map<String, String>
 
 @ControllerAdvice
 @Suppress("unused")
@@ -19,7 +23,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<in Any>? {
-        val body = buildResponseBody(ex)
+        val body = makeErrorBodyFor(ex)
 
         return ResponseEntity(body, headers, HttpStatus.BAD_REQUEST)
     }
@@ -30,11 +34,18 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<in Any>? {
-        val body = buildResponseBody(ex)
+        val body = makeErrorBodyFor(ex)
 
         return ResponseEntity(body, headers, HttpStatus.BAD_REQUEST)
     }
 
-    private fun buildResponseBody(ex: Exception) =
-        mapOf("error" to ex.message)
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleMethodArgumentTypeMismatch(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorBody> {
+        val body = makeErrorBodyFor(ex)
+
+        return ResponseEntity<ErrorBody>(body, HttpStatus.BAD_REQUEST)
+    }
+
+    private fun makeErrorBodyFor(ex: Exception): ErrorBody =
+        mapOf("error" to (ex.message ?: ""))
 }
