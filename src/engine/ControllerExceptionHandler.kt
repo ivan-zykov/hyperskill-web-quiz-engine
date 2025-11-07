@@ -46,6 +46,13 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity<ErrorBody>(body, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(QuizNotFoundException::class)
+    fun handleQuizNotFound(exception: QuizNotFoundException): ResponseEntity<ErrorBody> {
+        val body = makeErrorBodyFor(exception)
+
+        return ResponseEntity<ErrorBody>(body, HttpStatus.NOT_FOUND)
+    }
+
     private fun makeErrorBodyFor(ex: Exception): ErrorBody =
         mapOf("error" to (ex.message ?: ""))
 }

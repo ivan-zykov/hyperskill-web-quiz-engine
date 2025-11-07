@@ -43,8 +43,7 @@ class InMemoryQuizService : QuizService {
     }
 
     override fun getQuizWith(id: UInt): Pair<UInt, Quiz> {
-        val quiz = findQuizWith(id)
-        checkNotNull(quiz) { "Error. Failed to get quiz with id $id." }
+        val quiz = findQuizWith(id) ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
 
         return id to quiz
     }
@@ -61,3 +60,5 @@ private fun ConcurrentMap<UInt, Quiz>.add(
 ) {
     this[id] = quiz
 }
+
+class QuizNotFoundException(message: String) : RuntimeException(message)

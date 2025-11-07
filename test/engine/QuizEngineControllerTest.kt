@@ -120,4 +120,48 @@ class QuizEngineControllerTest @Autowired constructor(
         }
     }
 
+    @Test
+    fun `GET quizzes by id returns OK with one quiz`() {
+        val addedQuizId = addQuiz(quizSerialized).id
+
+        mockMvc.perform(get("$API_PATH/quizzes/${addedQuizId}"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").isNumber)
+            .andExpect(jsonPath("$.title").value(TITLE))
+            .andExpect(jsonPath("$.text").value(TEXT))
+            .andExpect(jsonPath("$.options[0]").value(OPTION))
+            .andExpect(jsonPath("$.answer").doesNotExist())
+    }
+
+    @Test
+    fun `GET quizzes by id returns Not found for non-existing id`() {
+        val quizId = 0
+
+        mockMvc.perform(get("$API_PATH/quizzes/$quizId"))
+            .andExpect(status().isNotFound)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                jsonPath("$.error")
+                    .value("Error. There is no quiz with id $quizId.")
+            )
+    }
+
+    private fun addQuiz(quizSerialized: String): QuizOutDto {
+        val result = mockMvc.perform(
+            post("$API_PATH/quizzes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(quizSerialized)
+        )
+            .andReturn()
+
+        val createdQuiz = mapper.readValue(
+            result.response.contentAsByteArray,
+            QuizOutDto::class.java
+        )
+        checkNotNull(createdQuiz) { "Error. Failed to add quiz $quizSerialized" }
+
+        return createdQuiz
+    }
+
 }
