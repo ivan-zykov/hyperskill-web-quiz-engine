@@ -10,7 +10,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 @Suppress("unused")
 @Service
 class InMemoryQuizService : QuizService {
-    override fun getQuiz(): Pair<UInt, Quiz> = 0U to Quiz(
+    override fun getQuiz(): QuizWithId = 0U to Quiz(
         title = "The Java Logo",
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
@@ -32,7 +32,7 @@ class InMemoryQuizService : QuizService {
 
     private val quizzes: ConcurrentMap<UInt, Quiz> = ConcurrentHashMap()
 
-    override fun addQuiz(quiz: Quiz): Pair<UInt, Quiz> {
+    override fun addQuiz(quiz: Quiz): QuizWithId {
         val newId = quiz.generateId()
         quizzes.add(newId, quiz)
 
@@ -42,7 +42,7 @@ class InMemoryQuizService : QuizService {
         return newId to createdQuiz
     }
 
-    override fun getQuizWith(id: UInt): Pair<UInt, Quiz> {
+    override fun getQuizWith(id: UInt): QuizWithId {
         val quiz = findQuizWith(id) ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
 
         return id to quiz

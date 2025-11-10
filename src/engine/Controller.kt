@@ -5,6 +5,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+typealias QuizWithId = Pair<UInt, Quiz>
+
 @Suppress("unused")
 @RestController
 @RequestMapping("/api")
@@ -70,8 +72,8 @@ private fun Pair<UInt, Quiz>.toDto() = QuizOutDto(
 )
 
 interface QuizService {
-    fun getQuiz(): Pair<UInt, Quiz>
+    fun getQuiz(): QuizWithId
     fun checkAnswer(answerIdx: Int): AnswerResult
-    fun addQuiz(quiz: Quiz): Pair<UInt, Quiz>
-    fun getQuizWith(id: UInt): Pair<UInt, Quiz>
+    fun addQuiz(quiz: Quiz): QuizWithId
+    fun getQuizWith(id: UInt): QuizWithId
 }
