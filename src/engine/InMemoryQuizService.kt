@@ -48,6 +48,10 @@ class InMemoryQuizService : QuizService {
         return id to quiz
     }
 
+    override fun getAllQuizzes(): List<QuizWithId> {
+        TODO("Not yet implemented")
+    }
+
     private fun findQuizWith(id: UInt) = quizzes[id]
 
     private fun Quiz.generateId() = title.hashCode().toUInt()

@@ -50,6 +50,16 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
             .contentType(MediaType.APPLICATION_JSON)
             .body(quiz.toDto())
     }
+
+    @GetMapping("/quizzes")
+    fun showAllQuizzes(): ResponseEntity<List<QuizOutDto>> {
+        val quizzes = quizService.getAllQuizzes()
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(quizzes.map { it.toDto() })
+    }
 }
 
 private fun AnswerResult.toDto() = ResultDto(
@@ -76,4 +86,5 @@ interface QuizService {
     fun checkAnswer(answerIdx: Int): AnswerResult
     fun addQuiz(quiz: Quiz): QuizWithId
     fun getQuizWith(id: UInt): QuizWithId
+    fun getAllQuizzes(): List<QuizWithId>
 }
