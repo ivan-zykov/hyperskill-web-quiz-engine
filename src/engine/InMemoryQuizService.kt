@@ -48,9 +48,9 @@ class InMemoryQuizService : QuizService {
         return id to quiz
     }
 
-    override fun getAllQuizzes(): List<QuizWithId> {
-        TODO("Not yet implemented")
-    }
+    override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
+
+    fun clearQuizzes() = quizzes.clear()
 
     private fun findQuizWith(id: UInt) = quizzes[id]
 

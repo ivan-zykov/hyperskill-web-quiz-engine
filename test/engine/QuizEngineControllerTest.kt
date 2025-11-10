@@ -2,7 +2,11 @@ package engine
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -32,9 +36,15 @@ private val quiz = QuizInDto(
 @AutoConfigureMockMvc
 class QuizEngineControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
+    private val quizService: InMemoryQuizService,
     private val mapper: ObjectMapper
 ) {
-    private val quizSerialized: String = mapper.writeValueAsString(quiz)
+    private val quizSerialized1: String = mapper.writeValueAsString(quiz)
+
+    @BeforeEach
+    fun reset() {
+        quizService.clear()
+    }
 
     @Test
     fun `GET quiz returns OK with one quiz`() {
@@ -77,7 +87,7 @@ class QuizEngineControllerTest @Autowired constructor(
         mockMvc.perform(
             post("$API_PATH/quizzes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(quizSerialized)
+                .content(quizSerialized1)
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -122,7 +132,7 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @Test
     fun `GET quizzes by id returns OK with one quiz`() {
-        val addedQuizId = addQuiz(quizSerialized).id
+        val addedQuizId = addQuiz(quizSerialized1).id
 
         mockMvc.perform(get("$API_PATH/quizzes/${addedQuizId}"))
             .andExpect(status().isOk)
@@ -147,6 +157,33 @@ class QuizEngineControllerTest @Autowired constructor(
             )
     }
 
+    @Test
+    fun `GET all quizzes returns empty array`() {
+        mockMvc.perform(get("$API_PATH/quizzes"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray)
+            .andExpect(jsonPath("$").isEmpty)
+    }
+
+    @Test
+    fun `GET all quizzes returns list with two`() {
+        addQuiz(quizSerialized1)
+        val quizSerialized2 = mapper.writeValueAsString(quiz.copy(title = "$TITLE 2"))
+        addQuiz(quizSerialized2)
+
+        val result = mockMvc.perform(get("$API_PATH/quizzes"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn()
+
+        val returnedQuizzes: List<QuizOutDto> = mapper.readValue(result.response.contentAsString)
+        assertNotEquals(returnedQuizzes[0].id, returnedQuizzes[1].id)
+        assertTrue(returnedQuizzes.all { it.title.isNotEmpty() })
+        assertTrue(returnedQuizzes.all { it.text == TEXT })
+        assertTrue(returnedQuizzes.all { it.options.first() == OPTION })
+    }
+
     private fun addQuiz(quizSerialized: String): QuizOutDto {
         val result = mockMvc.perform(
             post("$API_PATH/quizzes")
@@ -155,13 +192,11 @@ class QuizEngineControllerTest @Autowired constructor(
         )
             .andReturn()
 
-        val createdQuiz = mapper.readValue(
-            result.response.contentAsByteArray,
-            QuizOutDto::class.java
-        )
+        val createdQuiz: QuizOutDto? = mapper.readValue(result.response.contentAsByteArray)
         checkNotNull(createdQuiz) { "Error. Failed to add quiz $quizSerialized" }
 
         return createdQuiz
     }
 
+    private fun InMemoryQuizService.clear() = clearQuizzes()
 }

@@ -14,8 +14,7 @@ class ResultDto(
     val feedback: String
 )
 
-@Suppress("unused")
-class QuizInDto(
+data class QuizInDto(
     val title: String,
     val text: String,
     val options: List<String>,
