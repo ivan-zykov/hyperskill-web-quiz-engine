@@ -60,6 +60,19 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
             .contentType(MediaType.APPLICATION_JSON)
             .body(quizzes.map { it.toDto() })
     }
+
+    @PostMapping("/quizzes/{id}/solve")
+    fun solveQuiz(
+        @PathVariable id: UInt,
+        @RequestParam answer: Int,
+    ): ResponseEntity<ResultDto> {
+        val result = quizService.solveQuizWith(id, answer)
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(result.toDto())
+    }
 }
 
 private fun AnswerResult.toDto() = ResultDto(
@@ -87,4 +100,5 @@ interface QuizService {
     fun addQuiz(quiz: Quiz): QuizWithId
     fun getQuizWith(id: UInt): QuizWithId
     fun getAllQuizzes(): List<QuizWithId>
+    fun solveQuizWith(id: UInt, answer: Int): AnswerResult
 }
