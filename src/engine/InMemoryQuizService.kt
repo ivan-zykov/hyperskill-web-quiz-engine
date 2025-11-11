@@ -42,7 +42,10 @@ class InMemoryQuizService : QuizService {
 
     override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
 
-    override fun solveQuizWith(id: UInt, answer: Int): AnswerResult {
+    override fun solveQuizWith(
+        id: UInt,
+        answer: Int
+    ): AnswerResult {
         val quizWithId = getQuizWith(id)
 
         val (success, feedback) = quizWithId.check(answer)

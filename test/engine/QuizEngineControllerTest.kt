@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -182,6 +183,37 @@ class QuizEngineControllerTest @Autowired constructor(
         assertTrue(returnedQuizzes.all { it.title.isNotEmpty() })
         assertTrue(returnedQuizzes.all { it.text == TEXT })
         assertTrue(returnedQuizzes.all { it.options.first() == OPTION })
+    }
+
+    //    todo: refactor other tests to Kotlin DSL
+//    todo: make assertions in other tests looser
+    @Test
+    fun `POST quizzes-id-solve returns OK`() {
+        val idOfAddedQuiz = addQuiz(quizSerialized1).id
+
+        mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfAddedQuiz) {
+            param("answer", 0.toString())
+        }
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+//                todo: does it make sense to assert those? Serialization would fail otherwise?
+                jsonPath("$.success") { isBoolean() }
+                jsonPath("$.feedback") { isString() }
+            }
+    }
+
+    @Test
+    fun `POST quizzes-id-solve returns Not found for non-existing quiz`() {
+        val idOfNonExistingQuiz = 1
+
+        mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfNonExistingQuiz) {
+            param("answer", 0.toString())
+        }.andExpectAll {
+            status { isNotFound() }
+            content { contentType(MediaType.APPLICATION_JSON) }
+            jsonPath("$.error") { isString() }
+        }
     }
 
     private fun addQuiz(quizSerialized: String): QuizOutDto {
