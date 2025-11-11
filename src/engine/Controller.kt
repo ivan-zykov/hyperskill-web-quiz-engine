@@ -23,7 +23,7 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
 
     @PostMapping("/quiz")
     fun answerQuiz(@RequestParam answer: Int): ResponseEntity<ResultDto> {
-        val result = quizService.checkAnswer(answerIdx = answer)
+        val result = quizService.checkAnswer(answer = answer)
 
         return ResponseEntity
             .ok()
@@ -96,7 +96,7 @@ private fun Pair<UInt, Quiz>.toDto() = QuizOutDto(
 
 interface QuizService {
     fun getQuiz(): QuizWithId
-    fun checkAnswer(answerIdx: Int): AnswerResult
+    fun checkAnswer(answer: Int): AnswerResult
     fun addQuiz(quiz: Quiz): QuizWithId
     fun getQuizWith(id: UInt): QuizWithId
     fun getAllQuizzes(): List<QuizWithId>

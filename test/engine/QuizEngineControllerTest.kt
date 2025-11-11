@@ -43,7 +43,7 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @BeforeEach
     fun reset() {
-        quizService.clear()
+        quizService.reset()
     }
 
     @Test
@@ -198,5 +198,4 @@ class QuizEngineControllerTest @Autowired constructor(
         return createdQuiz
     }
 
-    private fun InMemoryQuizService.clear() = clearQuizzes()
 }

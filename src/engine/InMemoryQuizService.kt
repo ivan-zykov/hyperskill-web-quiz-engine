@@ -7,30 +7,22 @@ import java.util.concurrent.ConcurrentMap
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
-@Suppress("unused")
 @Service
 class InMemoryQuizService : QuizService {
-    override fun getQuiz(): QuizWithId = 0U to Quiz(
-        title = "The Java Logo",
-        text = "What is depicted on the Java logo?",
-        options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
-        answer = 2,
-    )
+    private val quizzes: ConcurrentMap<UInt, Quiz> = ConcurrentHashMap()
 
-    override fun checkAnswer(answerIdx: Int): AnswerResult {
-        val (success, feedback) = if (answerIdx == 2) {
-            true to CONGRATULATIONS
-        } else {
-            false to WRONG_ANSWER
-        }
+    override fun getQuiz(): QuizWithId = addInitialQuiz()
+
+    override fun checkAnswer(answer: Int): AnswerResult {
+        val initialQuiz = addInitialQuiz()
+
+        val (success, feedback) = initialQuiz.check(answer)
 
         return AnswerResult(
             success = success,
             feedback = feedback,
         )
     }
-
-    private val quizzes: ConcurrentMap<UInt, Quiz> = ConcurrentHashMap()
 
     override fun addQuiz(quiz: Quiz): QuizWithId {
         val newId = quiz.generateId()
@@ -61,7 +53,16 @@ class InMemoryQuizService : QuizService {
         )
     }
 
-    fun clearQuizzes() = quizzes.clear()
+    fun reset() = quizzes.clear()
+
+    private fun addInitialQuiz() = addQuiz(
+        Quiz(
+            title = "The Java Logo",
+            text = "What is depicted on the Java logo?",
+            options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
+            answer = 2,
+        )
+    )
 
     private fun QuizWithId.check(answer: Int) =
         if (second.answer == answer) {
