@@ -2,6 +2,7 @@ package engine
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
@@ -20,6 +21,25 @@ class InMemoryQuizServiceTest {
 
             assertEquals(expected, actual)
         }
+    }
+
+    @Test
+    fun `Checks wrong answer for quiz`() {
+        val sut = InMemoryQuizService()
+        val correctAnswer = 2
+        val wrongAnswer = 0
+        val quiz = Quiz(
+            title = "The Java Logo",
+            text = "What is depicted on the Java logo?",
+            options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
+            answer = correctAnswer,
+        )
+        sut.addQuiz(quiz = quiz)
+
+        val actual = sut.checkAnswer(wrongAnswer)
+
+        assertEquals(false, actual.success)
+        assertEquals(WRONG_ANSWER, actual.feedback)
     }
 
 }
