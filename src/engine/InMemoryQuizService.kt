@@ -51,10 +51,24 @@ class InMemoryQuizService : QuizService {
     override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
 
     override fun solveQuizWith(id: UInt, answer: Int): AnswerResult {
-        TODO("Not yet implemented")
+        val quizWithId = getQuizWith(id)
+
+        val (success, feedback) = quizWithId.check(answer)
+
+        return AnswerResult(
+            success = success,
+            feedback = feedback,
+        )
     }
 
     fun clearQuizzes() = quizzes.clear()
+
+    private fun QuizWithId.check(answer: Int) =
+        if (second.answer == answer) {
+            true to CONGRATULATIONS
+        } else {
+            false to WRONG_ANSWER
+        }
 
     private fun findQuizWith(id: UInt) = quizzes[id]
 
