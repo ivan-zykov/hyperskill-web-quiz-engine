@@ -1,0 +1,1 @@
+1. Write integration (controller) tests with loose assertions against the response's body
