@@ -15,16 +15,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 private const val API_PATH = "/api"
 
 private const val TITLE = "test title"
 private const val TEXT = "test text"
 private const val OPTION = "test option"
+
+private const val CONGRATULATIONS = "Congratulations, you're right!"
 
 private val quiz = QuizInDto(
     title = TITLE,
@@ -49,25 +50,29 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @Test
     fun `GET quiz returns OK with one quiz`() {
-        mockMvc.perform(get("$API_PATH/quiz"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.title").value("The Java Logo"))
-            .andExpect(jsonPath("$.text").value("What is depicted on the Java logo?"))
-            .andExpect(jsonPath("$.options").isArray)
-            .andExpect(jsonPath("$.options[0]").value("Robot"))
-            .andExpect(jsonPath("$.options[1]").value("Tea leaf"))
-            .andExpect(jsonPath("$.options[2]").value("Cup of coffee"))
-            .andExpect(jsonPath("$.options[3]").value("Bug"))
+        mockMvc.get("$API_PATH/quiz")
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.title") { value("The Java Logo") }
+                jsonPath("$.text") { value("What is depicted on the Java logo?") }
+                jsonPath("$.options") { isArray() }
+                jsonPath("$.options[0]") { value("Robot") }
+                jsonPath("$.options[1]") { value("Tea leaf") }
+                jsonPath("$.options[2]") { value("Cup of coffee") }
+                jsonPath("$.options[3]") { value("Bug") }
+            }
     }
 
     @Test
     fun `POST quiz returns OK for correct answer`() {
-        mockMvc.perform(post("$API_PATH/quiz?answer=2"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.feedback").value("Congratulations, you're right!"))
+        mockMvc.post("$API_PATH/quiz?answer=2")
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.success") { value(true) }
+                jsonPath("$.feedback") { value(CONGRATULATIONS) }
+            }
     }
 
     @TestFactory
@@ -76,27 +81,30 @@ class QuizEngineControllerTest @Autowired constructor(
         "a=2",
     ).map { requestParam ->
         dynamicTest("request param: $requestParam") {
-            mockMvc.perform(post("$API_PATH/quiz?$requestParam"))
-                .andExpect(status().isBadRequest)
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.error").isString)
+            mockMvc.post("$API_PATH/quiz?$requestParam")
+                .andExpectAll {
+                    status { isBadRequest() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.error") { isString() }
+                }
         }
     }
 
     @Test
     fun `POST quizzes returns OK with created quiz`() {
-        mockMvc.perform(
-            post("$API_PATH/quizzes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(quizSerialized1)
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.title").value(TITLE))
-            .andExpect(jsonPath("$.text").value(TEXT))
-            .andExpect(jsonPath("$.options[0]").value(OPTION))
-            .andExpect(jsonPath("$.answer").doesNotExist())
+        mockMvc.post("$API_PATH/quizzes") {
+            contentType = MediaType.APPLICATION_JSON
+            content = quizSerialized1
+        }
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.id") { isNumber() }
+                jsonPath("$.title") { TITLE }
+                jsonPath("$.text") { TEXT }
+                jsonPath("$.options[0]") { OPTION }
+                jsonPath("$.answer") { doesNotExist() }
+            }
     }
 
     @TestFactory
@@ -121,13 +129,14 @@ class QuizEngineControllerTest @Autowired constructor(
         add(bodyMissingAnswer to "answer")
     }.map { (body, expectedSubstring) ->
         dynamicTest("like: $body") {
-            mockMvc.perform(
-                post("$API_PATH/quizzes")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(body)
-            )
-                .andExpect(status().isBadRequest)
-                .andExpect(jsonPath("$.error", containsString(expectedSubstring)))
+            mockMvc.post("$API_PATH/quizzes") {
+                contentType = MediaType.APPLICATION_JSON
+                content = body
+            }
+                .andExpectAll {
+                    status { isBadRequest() }
+                    jsonPath("$.error") { containsString(expectedSubstring) }
+                }
         }
     }
 
@@ -135,36 +144,39 @@ class QuizEngineControllerTest @Autowired constructor(
     fun `GET quizzes by id returns OK with one quiz`() {
         val addedQuizId = addQuiz(quizSerialized1).id
 
-        mockMvc.perform(get("$API_PATH/quizzes/${addedQuizId}"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").isNumber)
-            .andExpect(jsonPath("$.title").value(TITLE))
-            .andExpect(jsonPath("$.text").value(TEXT))
-            .andExpect(jsonPath("$.options[0]").value(OPTION))
-            .andExpect(jsonPath("$.answer").doesNotExist())
+        mockMvc.get("$API_PATH/quizzes/${addedQuizId}")
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.id") { isNumber() }
+                jsonPath("$.title") { value(TITLE) }
+                jsonPath("$.text") { value(TEXT) }
+                jsonPath("$.options[0]") { value(OPTION) }
+                jsonPath("$.answer") { doesNotExist() }
+            }
     }
 
     @Test
     fun `GET quizzes by id returns Not found for non-existing id`() {
         val quizId = 0
 
-        mockMvc.perform(get("$API_PATH/quizzes/$quizId"))
-            .andExpect(status().isNotFound)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                jsonPath("$.error")
-                    .value("Error. There is no quiz with id $quizId.")
-            )
+        mockMvc.get("$API_PATH/quizzes/$quizId")
+            .andExpectAll {
+                status { isNotFound() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.error") { value("Error. There is no quiz with id $quizId.") }
+            }
     }
 
     @Test
     fun `GET all quizzes returns empty array`() {
-        mockMvc.perform(get("$API_PATH/quizzes"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$").isEmpty)
+        mockMvc.get("$API_PATH/quizzes")
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$") { isArray() }
+                jsonPath("$") { isEmpty() }
+            }
     }
 
     @Test
@@ -173,9 +185,11 @@ class QuizEngineControllerTest @Autowired constructor(
         val quizSerialized2 = mapper.writeValueAsString(quiz.copy(title = "$TITLE 2"))
         addQuiz(quizSerialized2)
 
-        val result = mockMvc.perform(get("$API_PATH/quizzes"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        val result = mockMvc.get("$API_PATH/quizzes")
+            .andExpectAll {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+            }
             .andReturn()
 
         val returnedQuizzes: List<QuizOutDto> = mapper.readValue(result.response.contentAsString)
@@ -185,8 +199,6 @@ class QuizEngineControllerTest @Autowired constructor(
         assertTrue(returnedQuizzes.all { it.options.first() == OPTION })
     }
 
-    //    todo: refactor other tests to Kotlin DSL
-//    todo: make assertions in other tests looser
     @Test
     fun `POST quizzes-id-solve returns OK`() {
         val idOfAddedQuiz = addQuiz(quizSerialized1).id
@@ -197,9 +209,8 @@ class QuizEngineControllerTest @Autowired constructor(
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
-//                todo: does it make sense to assert those? Serialization would fail otherwise?
-                jsonPath("$.success") { isBoolean() }
-                jsonPath("$.feedback") { isString() }
+                jsonPath("$.success") { value(true) }
+                jsonPath("$.feedback") { value(CONGRATULATIONS) }
             }
     }
 
