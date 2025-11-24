@@ -85,7 +85,8 @@ class QuizEngineControllerTest @Autowired constructor(
                 .andExpectAll {
                     status { isBadRequest() }
                     content { contentType(MediaType.APPLICATION_JSON) }
-                    jsonPath("$.error") { isString() }
+                    jsonPath("$.error") { value(containsString("parameter")) }
+                    jsonPath("$.error") { value(containsString("answer")) }
                 }
         }
     }
@@ -127,7 +128,7 @@ class QuizEngineControllerTest @Autowired constructor(
             .set<JsonNode>("options", mapper.valueToTree(listOf(OPTION)))
             .toString()
         add(bodyMissingAnswer to "answer")
-    }.map { (body, expectedSubstring) ->
+    }.map { (body, missingField) ->
         dynamicTest("like: $body") {
             mockMvc.post("$API_PATH/quizzes") {
                 contentType = MediaType.APPLICATION_JSON
@@ -135,7 +136,7 @@ class QuizEngineControllerTest @Autowired constructor(
             }
                 .andExpectAll {
                     status { isBadRequest() }
-                    jsonPath("$.error") { containsString(expectedSubstring) }
+                    jsonPath("$.error") { value(containsString(missingField)) }
                 }
         }
     }
@@ -164,7 +165,8 @@ class QuizEngineControllerTest @Autowired constructor(
             .andExpectAll {
                 status { isNotFound() }
                 content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$.error") { value("Error. There is no quiz with id $quizId.") }
+                jsonPath("$.error") { value(containsString("Error")) }
+                jsonPath("$.error") { value(containsString(quizId.toString())) }
             }
     }
 
@@ -223,7 +225,8 @@ class QuizEngineControllerTest @Autowired constructor(
         }.andExpectAll {
             status { isNotFound() }
             content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.error") { isString() }
+            jsonPath("$.error") { value(containsString("Error")) }
+            jsonPath("$.error") { value(containsString(idOfNonExistingQuiz.toString())) }
         }
     }
 
