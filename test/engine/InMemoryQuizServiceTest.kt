@@ -2,6 +2,7 @@ package engine
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
@@ -22,8 +23,23 @@ class InMemoryQuizServiceTest {
         }
     }
 
-    //    todo: Add test for solveQuizWith()
-//    @Test
-//    fun `Solve quiz`
+    @Test
+    fun `Solve quiz with wrong answer`() {
+        val correctAnswer = 2
+        val wrongAnswer = 0
+        val quiz = Quiz(
+            title = "Test title",
+            text = "Test text",
+            options = listOf("a", "b", "c"),
+            answer = correctAnswer,
+        )
+        val sut = InMemoryQuizService()
+        val (id, _) = sut.addQuiz(quiz = quiz)
+
+        val actual = sut.solveQuizWith(id, wrongAnswer)
+
+        val expected = AnswerResult(success = false, feedback = WRONG_ANSWER)
+        assertEquals(expected, actual)
+    }
 
 }
