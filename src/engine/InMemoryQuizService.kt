@@ -9,7 +9,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
 class InMemoryQuizService : QuizService {
-    private val quizzes: ConcurrentMap<UInt, Quiz> = ConcurrentHashMap()
+    private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
 
     override fun getQuiz(): QuizWithId = addInitialQuiz()
 
@@ -34,7 +34,7 @@ class InMemoryQuizService : QuizService {
         return newId to createdQuiz
     }
 
-    override fun getQuizWith(id: UInt): QuizWithId {
+    override fun getQuizWith(id: Int): QuizWithId {
         val quiz = findQuizWith(id) ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
 
         return id to quiz
@@ -43,7 +43,7 @@ class InMemoryQuizService : QuizService {
     override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
 
     override fun solveQuizWith(
-        id: UInt,
+        id: Int,
         answer: Int
     ): AnswerResult {
         val quizWithId = getQuizWith(id)
@@ -74,14 +74,17 @@ class InMemoryQuizService : QuizService {
             false to WRONG_ANSWER
         }
 
-    private fun findQuizWith(id: UInt) = quizzes[id]
+    private fun findQuizWith(id: Int) = quizzes[id]
 
-    private fun Quiz.generateId() = title.hashCode().toUInt()
+    private fun Quiz.generateId(): Int {
+        val hashCode = title.hashCode()
+        return if (hashCode >= 0) hashCode else hashCode.unaryMinus()
+    }
 
 }
 
-private fun ConcurrentMap<UInt, Quiz>.add(
-    id: UInt,
+private fun ConcurrentMap<Int, Quiz>.add(
+    id: Int,
     quiz: Quiz
 ) {
     this[id] = quiz

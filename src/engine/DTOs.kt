@@ -2,7 +2,7 @@ package engine
 
 @Suppress("unused")
 class QuizOutDto(
-    val id: UInt,
+    val id: Int,
     val title: String,
     val text: String,
     val options: List<String>,

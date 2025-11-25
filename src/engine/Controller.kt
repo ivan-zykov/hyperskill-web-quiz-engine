@@ -5,7 +5,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-typealias QuizWithId = Pair<UInt, Quiz>
+typealias QuizWithId = Pair<Int, Quiz>
 
 @Suppress("unused")
 @RestController
@@ -42,7 +42,7 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
     }
 
     @GetMapping("/quizzes/{id}")
-    fun showQuiz(@PathVariable id: UInt): ResponseEntity<QuizOutDto> {
+    fun showQuiz(@PathVariable id: Int): ResponseEntity<QuizOutDto> {
         val quiz = quizService.getQuizWith(id)
 
         return ResponseEntity
@@ -63,7 +63,7 @@ class QuizEngineController @Autowired constructor(val quizService: QuizService) 
 
     @PostMapping("/quizzes/{id}/solve")
     fun solveQuiz(
-        @PathVariable id: UInt,
+        @PathVariable id: Int,
         @RequestParam answer: Int,
     ): ResponseEntity<ResultDto> {
         val result = quizService.solveQuizWith(id, answer)
@@ -87,7 +87,7 @@ private fun QuizInDto.toDomain() = Quiz(
     answer = answer,
 )
 
-private fun Pair<UInt, Quiz>.toDto() = QuizOutDto(
+private fun Pair<Int, Quiz>.toDto() = QuizOutDto(
     id = first,
     title = second.title,
     text = second.text,
@@ -98,7 +98,7 @@ interface QuizService {
     fun getQuiz(): QuizWithId
     fun checkAnswer(answer: Int): AnswerResult
     fun addQuiz(quiz: Quiz): QuizWithId
-    fun getQuizWith(id: UInt): QuizWithId
+    fun getQuizWith(id: Int): QuizWithId
     fun getAllQuizzes(): List<QuizWithId>
-    fun solveQuizWith(id: UInt, answer: Int): AnswerResult
+    fun solveQuizWith(id: Int, answer: Int): AnswerResult
 }
