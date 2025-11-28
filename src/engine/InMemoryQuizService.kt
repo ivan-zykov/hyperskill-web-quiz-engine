@@ -1,16 +1,13 @@
 package engine
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
-class InMemoryQuizService : QuizService {
-    private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
-
+class InMemoryQuizService @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
     override fun getQuiz(): QuizWithId = addInitialQuiz()
 
     override fun checkAnswer(answer: Int): AnswerResult {
@@ -26,21 +23,20 @@ class InMemoryQuizService : QuizService {
 
     override fun addQuiz(quiz: Quiz): QuizWithId {
         val newId = quiz.generateId()
-        quizzes.add(newId, quiz)
+        quizzesRepo.addQuiz(newId, quiz)
 
-        val createdQuiz = findQuizWith(newId)
+        val createdQuiz = quizzesRepo.findQuizWith(newId)
         checkNotNull(createdQuiz) { "Error. Failed to persist new quiz $quiz with id $newId." }
 
         return newId to createdQuiz
     }
 
     override fun getQuizWith(id: Int): QuizWithId {
-        val quiz = findQuizWith(id) ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
-
+        val quiz = quizzesRepo.findQuizWith(id)
         return id to quiz
     }
 
-    override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
+    override fun getAllQuizzes(): List<QuizWithId> = quizzesRepo.getAllQuizzes()
 
     override fun solveQuizWith(
         id: Int,
@@ -55,8 +51,6 @@ class InMemoryQuizService : QuizService {
             feedback = feedback,
         )
     }
-
-    fun reset() = quizzes.clear()
 
     private fun addInitialQuiz() = addQuiz(
         Quiz(
@@ -74,20 +68,9 @@ class InMemoryQuizService : QuizService {
             false to WRONG_ANSWER
         }
 
-    private fun findQuizWith(id: Int) = quizzes[id]
-
     private fun Quiz.generateId(): Int {
         val hashCode = title.hashCode()
         return if (hashCode >= 0) hashCode else hashCode.unaryMinus()
     }
 
 }
-
-private fun ConcurrentMap<Int, Quiz>.add(
-    id: Int,
-    quiz: Quiz
-) {
-    this[id] = quiz
-}
-
-class QuizNotFoundException(message: String) : RuntimeException(message)

@@ -15,7 +15,8 @@ class InMemoryQuizServiceTest {
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
         dynamicTest("answer $answerIdx is ${expected.success}") {
-            val sut = InMemoryQuizService()
+//            todo: share instance of InMemoryQuizService because it is a singleton anyway and will be same instance in all tests
+            val sut = InMemoryQuizService(QuizzesRepository())
 
             val actual = sut.checkAnswer(answerIdx)
 
@@ -33,7 +34,7 @@ class InMemoryQuizServiceTest {
             options = listOf("a", "b", "c"),
             answer = correctAnswer,
         )
-        val sut = InMemoryQuizService()
+        val sut = InMemoryQuizService(QuizzesRepository())
         val (id, _) = sut.addQuiz(quiz = quiz)
 
         val actual = sut.solveQuizWith(id, wrongAnswer)
