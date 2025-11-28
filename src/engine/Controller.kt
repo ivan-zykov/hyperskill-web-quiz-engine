@@ -10,7 +10,7 @@ typealias QuizWithId = Pair<Int, Quiz>
 @Suppress("unused")
 @RestController
 @RequestMapping("/api")
-class QuizEngineController @Autowired constructor(val quizService: QuizService) {
+class QuizEngineController @Autowired constructor(private val quizService: QuizService) {
     @GetMapping("/quiz")
     fun getQuiz(): ResponseEntity<QuizOutDto> {
         val idToQuiz = quizService.getQuiz()
