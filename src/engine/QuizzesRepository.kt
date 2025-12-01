@@ -8,8 +8,12 @@ import java.util.concurrent.ConcurrentMap
 class QuizzesRepository {
     private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
 
-    fun addQuiz(id: Int, quiz: Quiz) {
-        quizzes[id] = quiz
+    fun addQuiz(quiz: Quiz): QuizWithId {
+        val newId = quiz.generateId()
+        save(newId, quiz)
+        val persistedQuiz = findQuizWith(newId)
+
+        return newId to persistedQuiz
     }
 
     fun findQuizWith(id: Int) = quizzes[id]
@@ -21,6 +25,18 @@ class QuizzesRepository {
         quizzes.clear()
     }
 
+    private fun save(
+        newId: Int,
+        quiz: Quiz
+    ) {
+        quizzes[newId] = quiz
+    }
+
+}
+
+private fun Quiz.generateId(): Int {
+    val hashCode = title.hashCode()
+    return if (hashCode >= 0) hashCode else hashCode.unaryMinus()
 }
 
 class QuizNotFoundException(message: String) : RuntimeException(message)

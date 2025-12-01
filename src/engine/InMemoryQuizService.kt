@@ -22,13 +22,9 @@ class InMemoryQuizService @Autowired constructor(private val quizzesRepo: Quizze
     }
 
     override fun addQuiz(quiz: Quiz): QuizWithId {
-        val newId = quiz.generateId()
-        quizzesRepo.addQuiz(newId, quiz)
+        val (id, createdQuiz) = quizzesRepo.addQuiz(quiz)
 
-        val createdQuiz = quizzesRepo.findQuizWith(newId)
-        checkNotNull(createdQuiz) { "Error. Failed to persist new quiz $quiz with id $newId." }
-
-        return newId to createdQuiz
+        return id to createdQuiz
     }
 
     override fun getQuizWith(id: Int): QuizWithId {
@@ -61,16 +57,11 @@ class InMemoryQuizService @Autowired constructor(private val quizzesRepo: Quizze
         )
     )
 
-    private fun QuizWithId.check(answer: Int) =
-        if (second.answer == answer) {
-            true to CONGRATULATIONS
-        } else {
-            false to WRONG_ANSWER
-        }
-
-    private fun Quiz.generateId(): Int {
-        val hashCode = title.hashCode()
-        return if (hashCode >= 0) hashCode else hashCode.unaryMinus()
-    }
-
 }
+
+private fun QuizWithId.check(answer: Int) =
+    if (second.answer == answer) {
+        true to CONGRATULATIONS
+    } else {
+        false to WRONG_ANSWER
+    }
