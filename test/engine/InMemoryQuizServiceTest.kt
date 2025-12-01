@@ -1,23 +1,30 @@
 package engine
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.springframework.beans.factory.annotation.Autowired
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 class InMemoryQuizServiceTest {
+    private val quizzesRepository = @Autowired QuizzesRepository()
+    private val sut = @Autowired InMemoryQuizService(quizzesRepository)
+
+    @BeforeEach
+    fun resetQuizzesRepository() {
+        quizzesRepository.reset()
+    }
+
     @TestFactory
     fun `Checking quiz result for`() = listOf(
         2 to AnswerResult(success = true, feedback = CONGRATULATIONS),
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
         dynamicTest("answer $answerIdx is ${expected.success}") {
-//            todo: share instance of InMemoryQuizService because it is a singleton anyway and will be same instance in all tests
-            val sut = InMemoryQuizService(QuizzesRepository())
-
             val actual = sut.checkAnswer(answerIdx)
 
             assertEquals(expected, actual)
@@ -34,7 +41,6 @@ class InMemoryQuizServiceTest {
             options = listOf("a", "b", "c"),
             answer = correctAnswer,
         )
-        val sut = InMemoryQuizService(QuizzesRepository())
         val (id, _) = sut.addQuiz(quiz = quiz)
 
         val actual = sut.solveQuizWith(id, wrongAnswer)
