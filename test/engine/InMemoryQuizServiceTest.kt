@@ -11,8 +11,8 @@ private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 class InMemoryQuizServiceTest {
-    private val quizzesRepository = @Autowired QuizzesRepository()
-    private val sut = @Autowired InMemoryQuizService(quizzesRepository)
+    private val quizzesRepository = @Autowired InMemoryQuizzesRepository()
+    private val sut = @Autowired QuizServiceImpl(quizzesRepository)
 
     @BeforeEach
     fun resetQuizzesRepository() {

@@ -5,21 +5,24 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Repository
-class QuizzesRepository {
+class InMemoryQuizzesRepository : QuizzesRepository {
     private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
 
-    fun addQuiz(quiz: Quiz): QuizWithId {
+    override fun addQuiz(quiz: Quiz): QuizWithId {
         val newId = quiz.generateId()
         save(newId, quiz)
-        val persistedQuiz = findQuizWith(newId)
 
-        return newId to persistedQuiz
+        return findQuizWith(newId)
     }
 
-    fun findQuizWith(id: Int) = quizzes[id]
-        ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
+    override fun findQuizWith(id: Int): QuizWithId {
+        val quiz = quizzes[id]
+            ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
 
-    fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
+        return id to quiz
+    }
+
+    override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
 
     fun reset() {
         quizzes.clear()

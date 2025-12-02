@@ -7,7 +7,7 @@ private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
-class InMemoryQuizService @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
+class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
     override fun getQuiz(): QuizWithId = addInitialQuiz()
 
     override fun checkAnswer(answer: Int): AnswerResult {
@@ -27,10 +27,7 @@ class InMemoryQuizService @Autowired constructor(private val quizzesRepo: Quizze
         return id to createdQuiz
     }
 
-    override fun getQuizWith(id: Int): QuizWithId {
-        val quiz = quizzesRepo.findQuizWith(id)
-        return id to quiz
-    }
+    override fun getQuizWith(id: Int): QuizWithId = quizzesRepo.findQuizWith(id)
 
     override fun getAllQuizzes(): List<QuizWithId> = quizzesRepo.getAllQuizzes()
 
@@ -57,6 +54,12 @@ class InMemoryQuizService @Autowired constructor(private val quizzesRepo: Quizze
         )
     )
 
+}
+
+interface QuizzesRepository {
+    fun addQuiz(quiz: Quiz): QuizWithId
+    fun findQuizWith(id: Int): QuizWithId
+    fun getAllQuizzes(): List<QuizWithId>
 }
 
 private fun QuizWithId.check(answer: Int) =

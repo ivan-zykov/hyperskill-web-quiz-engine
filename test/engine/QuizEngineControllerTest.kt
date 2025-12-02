@@ -38,7 +38,7 @@ private val quiz = QuizInDto(
 @AutoConfigureMockMvc
 class QuizEngineControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
-    private val quizzesRepository: QuizzesRepository,
+    private val quizzesRepository: InMemoryQuizzesRepository,
     private val mapper: ObjectMapper
 ) {
     private val quizSerialized1: String = mapper.writeValueAsString(quiz)
