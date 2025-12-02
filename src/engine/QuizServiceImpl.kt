@@ -21,11 +21,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
         )
     }
 
-    override fun addQuiz(quiz: Quiz): QuizWithId {
-        val (id, createdQuiz) = quizzesRepo.addQuiz(quiz)
-
-        return id to createdQuiz
-    }
+    override fun addQuiz(quiz: Quiz): QuizWithId = quizzesRepo.addQuiz(quiz)
 
     override fun getQuizWith(id: Int): QuizWithId = quizzesRepo.findQuizWith(id)
 
