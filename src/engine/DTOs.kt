@@ -1,7 +1,7 @@
 package engine
 
 class QuizOutDto(
-    val id: Int,
+    val id: QuizId,
     val title: String,
     val text: String,
     val options: List<String>,

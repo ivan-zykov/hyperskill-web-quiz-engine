@@ -5,20 +5,18 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-typealias QuizWithId = Pair<Int, Quiz>
-
 @Suppress("unused")
 @RestController
 @RequestMapping("/api")
 class QuizEngineController @Autowired constructor(private val quizService: QuizService) {
     @GetMapping("/quiz")
     fun getQuiz(): ResponseEntity<QuizOutDto> {
-        val idToQuiz = quizService.getQuiz()
+        val quiz = quizService.getQuiz()
 
         return ResponseEntity
             .ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(idToQuiz.toDto())
+            .body(quiz.toDto())
     }
 
     @PostMapping("/quiz")
@@ -42,7 +40,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @GetMapping("/quizzes/{id}")
-    fun showQuiz(@PathVariable id: Int): ResponseEntity<QuizOutDto> {
+    fun showQuiz(@PathVariable id: QuizId): ResponseEntity<QuizOutDto> {
         val quiz = quizService.getQuizWith(id)
 
         return ResponseEntity
@@ -63,7 +61,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
     @PostMapping("/quizzes/{id}/solve")
     fun solveQuiz(
-        @PathVariable id: Int,
+        @PathVariable id: QuizId,
         @RequestParam answer: Int,
     ): ResponseEntity<ResultDto> {
         val result = quizService.solveQuizWith(id, answer)
@@ -87,18 +85,19 @@ private fun QuizInDto.toDomain() = Quiz(
     answer = answer,
 )
 
-private fun Pair<Int, Quiz>.toDto() = QuizOutDto(
-    id = first,
-    title = second.title,
-    text = second.text,
-    options = second.options,
+private fun Quiz.toDto() = QuizOutDto(
+//    todo: Add NewQuiz domain class without ID
+    id = id ?: throw IllegalArgumentException("ID of saved quiz must be not null"),
+    title = title,
+    text = text,
+    options = options,
 )
 
 interface QuizService {
-    fun getQuiz(): QuizWithId
+    fun getQuiz(): Quiz
     fun checkAnswer(answer: Int): AnswerResult
-    fun addQuiz(quiz: Quiz): QuizWithId
-    fun getQuizWith(id: Int): QuizWithId
-    fun getAllQuizzes(): List<QuizWithId>
-    fun solveQuizWith(id: Int, answer: Int): AnswerResult
+    fun addQuiz(quiz: Quiz): Quiz
+    fun getQuizWith(id: QuizId): Quiz
+    fun getAllQuizzes(): List<Quiz>
+    fun solveQuizWith(id: QuizId, answer: Int): AnswerResult
 }

@@ -143,7 +143,7 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @Test
     fun `GET quizzes by id returns OK with one quiz`() {
-        val addedQuizId = addQuiz(quizSerialized1).id
+        val addedQuizId = addQuiz(quizSerialized1).id.value
 
         mockMvc.get("$API_PATH/quizzes/${addedQuizId}")
             .andExpectAll {
@@ -203,7 +203,7 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @Test
     fun `POST quizzes-id-solve returns OK`() {
-        val idOfAddedQuiz = addQuiz(quizSerialized1).id
+        val idOfAddedQuiz = addQuiz(quizSerialized1).id.value
 
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfAddedQuiz) {
             param("answer", 0.toString())

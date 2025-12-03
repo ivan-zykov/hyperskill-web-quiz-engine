@@ -8,7 +8,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
 class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
-    override fun getQuiz(): QuizWithId = addInitialQuiz()
+    override fun getQuiz(): Quiz = addInitialQuiz()
 
     override fun checkAnswer(answer: Int): AnswerResult {
         val initialQuiz = addInitialQuiz()
@@ -21,19 +21,19 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
         )
     }
 
-    override fun addQuiz(quiz: Quiz): QuizWithId = quizzesRepo.addQuiz(quiz)
+    override fun addQuiz(quiz: Quiz): Quiz = quizzesRepo.addQuiz(quiz)
 
-    override fun getQuizWith(id: Int): QuizWithId = quizzesRepo.findQuizWith(id)
+    override fun getQuizWith(id: QuizId): Quiz = quizzesRepo.findQuizBy(id)
 
-    override fun getAllQuizzes(): List<QuizWithId> = quizzesRepo.getAllQuizzes()
+    override fun getAllQuizzes(): List<Quiz> = quizzesRepo.getAllQuizzes()
 
     override fun solveQuizWith(
-        id: Int,
+        id: QuizId,
         answer: Int
     ): AnswerResult {
-        val quizWithId = getQuizWith(id)
+        val quiz = getQuizWith(id)
 
-        val (success, feedback) = quizWithId.check(answer)
+        val (success, feedback) = quiz.check(answer)
 
         return AnswerResult(
             success = success,
@@ -53,13 +53,13 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 }
 
 interface QuizzesRepository {
-    fun addQuiz(quiz: Quiz): QuizWithId
-    fun findQuizWith(id: Int): QuizWithId
-    fun getAllQuizzes(): List<QuizWithId>
+    fun addQuiz(quiz: Quiz): Quiz
+    fun findQuizBy(id: QuizId): Quiz
+    fun getAllQuizzes(): List<Quiz>
 }
 
-private fun QuizWithId.check(answer: Int) =
-    if (second.answer == answer) {
+private fun Quiz.check(answer: Int) =
+    if (this.answer == answer) {
         true to CONGRATULATIONS
     } else {
         false to WRONG_ANSWER

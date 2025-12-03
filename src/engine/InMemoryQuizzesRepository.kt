@@ -6,40 +6,39 @@ import java.util.concurrent.ConcurrentMap
 
 @Repository
 class InMemoryQuizzesRepository : QuizzesRepository {
-    private val quizzes: ConcurrentMap<Int, Quiz> = ConcurrentHashMap()
+    private val quizzes: ConcurrentMap<QuizId, Quiz> = ConcurrentHashMap()
 
-    override fun addQuiz(quiz: Quiz): QuizWithId {
+    override fun addQuiz(quiz: Quiz): Quiz {
         val newId = quiz.generateId()
         save(newId, quiz)
 
-        return findQuizWith(newId)
+        return findQuizBy(newId)
     }
 
-    override fun findQuizWith(id: Int): QuizWithId {
-        val quiz = quizzes[id]
-            ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
+    override fun findQuizBy(id: QuizId): Quiz = quizzes[id]
+        ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
 
-        return id to quiz
-    }
-
-    override fun getAllQuizzes(): List<QuizWithId> = quizzes.toList()
+    override fun getAllQuizzes(): List<Quiz> = quizzes.values.toList()
 
     fun reset() {
         quizzes.clear()
     }
 
     private fun save(
-        newId: Int,
+        newId: QuizId,
         quiz: Quiz
     ) {
-        quizzes[newId] = quiz
+        val quizWithId = quiz.copy(id = newId)
+        quizzes[newId] = quizWithId
     }
 
 }
 
-private fun Quiz.generateId(): Int {
-    val hashCode = title.hashCode()
-    return if (hashCode >= 0) hashCode else hashCode.unaryMinus()
+// todo: why this instead of just counter variable?
+private fun Quiz.generateId(): QuizId {
+    val hashCode = this.title.hashCode()
+    val value = if (hashCode >= 0) hashCode else hashCode.unaryMinus()
+    return QuizId(value)
 }
 
 class QuizNotFoundException(message: String) : RuntimeException(message)
