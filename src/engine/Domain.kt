@@ -15,7 +15,7 @@ data class Quiz(
     val text: String,
     val options: List<String>,
     val answer: Int,
-    val id: QuizId? = null,
+    val id: QuizId,
 )
 
 data class AnswerResult(

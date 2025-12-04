@@ -86,7 +86,7 @@ private fun QuizInDto.toNewQuiz() = NewQuiz(
 )
 
 private fun Quiz.toDto() = QuizOutDto(
-    id = id ?: throw IllegalArgumentException("ID of saved quiz must be not null"),
+    id = id,
     title = title,
     text = text,
     options = options,
