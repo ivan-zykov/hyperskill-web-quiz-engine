@@ -28,11 +28,11 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
     @PostMapping("/quizzes")
     fun addQuiz(@RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
-        val createdIdToQuiz = quizService.addQuiz(quiz.toNewQuiz())
+        val createdQuiz = quizService.addQuiz(quiz.toNewQuiz())
 
         return ResponseEntity
             .ok()
-            .body(createdIdToQuiz.toDto())
+            .body(createdQuiz.toDto())
     }
 
     @GetMapping("/quizzes/{id}")
