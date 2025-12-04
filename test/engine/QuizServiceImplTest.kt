@@ -15,7 +15,7 @@ class QuizServiceImplTest {
     private val quizzesRepository = @Autowired InMemoryQuizzesRepository()
     private val sut = @Autowired QuizServiceImpl(quizzesRepository)
 
-    private val quiz1Id = QuizId(331833382)
+    private val quiz1Id = QuizId(1)
     private val quiz1 = Quiz(
         title = "The Java Logo",
         text = "What is depicted on the Java logo?",
@@ -92,7 +92,7 @@ class QuizServiceImplTest {
     fun `Gets two quizzes`() {
         sut.addQuiz(quiz = quiz1)
         val quiz2 = quiz1.copy(title = "The Java Logo 2")
-        val quiz2Id = QuizId(1064299156)
+        val quiz2Id = QuizId(2)
         sut.addQuiz(quiz = quiz2)
 
         val actual = sut.getAllQuizzes()

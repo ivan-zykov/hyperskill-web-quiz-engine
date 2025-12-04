@@ -7,13 +7,16 @@ import java.util.concurrent.ConcurrentMap
 @Repository
 class InMemoryQuizzesRepository : QuizzesRepository {
     private val quizzes: ConcurrentMap<QuizId, Quiz> = ConcurrentHashMap()
+    private var nextQuizIdValue = 1
 
     override fun addQuiz(quiz: Quiz): Quiz {
-        val newId = quiz.generateId()
+        val newId = generateNextId()
         save(newId, quiz)
 
         return findQuizBy(newId)
     }
+
+    private fun generateNextId(): QuizId = QuizId(nextQuizIdValue++)
 
     override fun findQuizBy(id: QuizId): Quiz = quizzes[id]
         ?: throw QuizNotFoundException("Error. There is no quiz with id $id.")
@@ -32,13 +35,6 @@ class InMemoryQuizzesRepository : QuizzesRepository {
         quizzes[newId] = quizWithId
     }
 
-}
-
-// todo: why this instead of just counter variable?
-private fun Quiz.generateId(): QuizId {
-    val hashCode = this.title.hashCode()
-    val value = if (hashCode >= 0) hashCode else hashCode.unaryMinus()
-    return QuizId(value)
 }
 
 class QuizNotFoundException(message: String) : RuntimeException(message)
