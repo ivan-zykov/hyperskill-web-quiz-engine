@@ -9,9 +9,9 @@ class InMemoryQuizzesRepository : QuizzesRepository {
     private val quizzes: ConcurrentMap<QuizId, Quiz> = ConcurrentHashMap()
     private var nextQuizIdValue = 1
 
-    override fun addQuiz(quiz: Quiz): Quiz {
+    override fun addQuiz(newQuiz: NewQuiz): Quiz {
         val newId = generateNextId()
-        save(newId, quiz)
+        save(newId, newQuiz)
 
         return findQuizBy(newId)
     }
@@ -29,10 +29,16 @@ class InMemoryQuizzesRepository : QuizzesRepository {
 
     private fun save(
         newId: QuizId,
-        quiz: Quiz
+        newQuiz: NewQuiz
     ) {
-        val quizWithId = quiz.copy(id = newId)
-        quizzes[newId] = quizWithId
+        val quiz = Quiz(
+            title = newQuiz.title,
+            text = newQuiz.text,
+            options = newQuiz.options,
+            answer = newQuiz.answer,
+            id = newId,
+        )
+        quizzes[newId] = quiz
     }
 
 }

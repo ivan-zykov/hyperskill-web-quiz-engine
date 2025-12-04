@@ -31,7 +31,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
     @PostMapping("/quizzes")
     fun addQuiz(@RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
-        val createdIdToQuiz = quizService.addQuiz(quiz.toDomain())
+        val createdIdToQuiz = quizService.addQuiz(quiz.toNewQuiz())
 
         return ResponseEntity
             .ok()
@@ -78,7 +78,7 @@ private fun AnswerResult.toDto() = ResultDto(
     feedback = feedback,
 )
 
-private fun QuizInDto.toDomain() = Quiz(
+private fun QuizInDto.toNewQuiz() = NewQuiz(
     title = title,
     text = text,
     options = options,
@@ -86,7 +86,6 @@ private fun QuizInDto.toDomain() = Quiz(
 )
 
 private fun Quiz.toDto() = QuizOutDto(
-//    todo: Add NewQuiz domain class without ID
     id = id ?: throw IllegalArgumentException("ID of saved quiz must be not null"),
     title = title,
     text = text,
@@ -96,7 +95,7 @@ private fun Quiz.toDto() = QuizOutDto(
 interface QuizService {
     fun getQuiz(): Quiz
     fun checkAnswer(answer: Int): AnswerResult
-    fun addQuiz(quiz: Quiz): Quiz
+    fun addQuiz(newQuiz: NewQuiz): Quiz
     fun getQuizWith(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
     fun solveQuizWith(id: QuizId, answer: Int): AnswerResult

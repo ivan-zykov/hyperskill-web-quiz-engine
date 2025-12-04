@@ -21,7 +21,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
         )
     }
 
-    override fun addQuiz(quiz: Quiz): Quiz = quizzesRepo.addQuiz(quiz)
+    override fun addQuiz(newQuiz: NewQuiz): Quiz = quizzesRepo.addQuiz(newQuiz)
 
     override fun getQuizWith(id: QuizId): Quiz = quizzesRepo.findQuizBy(id)
 
@@ -42,7 +42,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
     }
 
     private fun addInitialQuiz() = addQuiz(
-        Quiz(
+        NewQuiz(
             title = "The Java Logo",
             text = "What is depicted on the Java logo?",
             options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
@@ -53,7 +53,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 }
 
 interface QuizzesRepository {
-    fun addQuiz(quiz: Quiz): Quiz
+    fun addQuiz(newQuiz: NewQuiz): Quiz
     fun findQuizBy(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
 }

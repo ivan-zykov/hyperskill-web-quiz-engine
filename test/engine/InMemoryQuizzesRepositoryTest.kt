@@ -12,7 +12,7 @@ class InMemoryQuizzesRepositoryTest {
     private val sut = @Autowired InMemoryQuizzesRepository()
 
     private val quiz1Id = QuizId(1)
-    private val quiz1 = Quiz(
+    private val newQuiz1 = NewQuiz(
         title = "The Java Logo",
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
@@ -26,30 +26,30 @@ class InMemoryQuizzesRepositoryTest {
 
     @Test
     fun `Adds a quiz`() {
-        val addedQuizId = sut.addQuiz(quiz = quiz1).id!!
+        val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id!!
 
         val actual = sut.findQuizBy(addedQuizId)
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
-            { assertEquals(quiz1.title, actual.title) },
-            { assertEquals(quiz1.text, actual.text) },
-            { assertEquals(quiz1.options, actual.options) },
-            { assertEquals(quiz1.answer, actual.answer) }
+            { assertEquals(newQuiz1.title, actual.title) },
+            { assertEquals(newQuiz1.text, actual.text) },
+            { assertEquals(newQuiz1.options, actual.options) },
+            { assertEquals(newQuiz1.answer, actual.answer) }
         )
     }
 
     @Test
     fun `Gets quiz by ID`() {
-        sut.addQuiz(quiz1)
+        sut.addQuiz(newQuiz1)
 
         val actual = sut.findQuizBy(id = quiz1Id)
 
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
-            { assertEquals(quiz1.title, actual.title) },
-            { assertEquals(quiz1.text, actual.text) },
-            { assertEquals(quiz1.options, actual.options) },
-            { assertEquals(quiz1.answer, actual.answer) }
+            { assertEquals(newQuiz1.title, actual.title) },
+            { assertEquals(newQuiz1.text, actual.text) },
+            { assertEquals(newQuiz1.options, actual.options) },
+            { assertEquals(newQuiz1.answer, actual.answer) }
         )
     }
 
@@ -73,32 +73,32 @@ class InMemoryQuizzesRepositoryTest {
 
     @Test
     fun `Gets two quizzes`() {
-        sut.addQuiz(quiz = quiz1)
-        val quiz2 = quiz1.copy(title = "The Java Logo 2")
+        sut.addQuiz(newQuiz = newQuiz1)
+        val newQuiz2 = newQuiz1.copy(title = "The Java Logo 2")
         val quiz2Id = QuizId(2)
-        sut.addQuiz(quiz = quiz2)
+        sut.addQuiz(newQuiz = newQuiz2)
 
         val actual = sut.getAllQuizzes()
 
         assertAll(
             { assertEquals(2, actual.size) },
             { assertEquals(quiz1Id, actual[0].id) },
-            { assertEquals(quiz1.title, actual[0].title) },
-            { assertEquals(quiz1.text, actual[0].text) },
-            { assertEquals(quiz1.options, actual[0].options) },
-            { assertEquals(quiz1.answer, actual[0].answer) },
+            { assertEquals(newQuiz1.title, actual[0].title) },
+            { assertEquals(newQuiz1.text, actual[0].text) },
+            { assertEquals(newQuiz1.options, actual[0].options) },
+            { assertEquals(newQuiz1.answer, actual[0].answer) },
             { assertEquals(quiz2Id, actual[1].id) },
-            { assertEquals(quiz2.title, actual[1].title) },
-            { assertEquals(quiz2.text, actual[1].text) },
-            { assertEquals(quiz2.options, actual[1].options) },
-            { assertEquals(quiz2.answer, actual[1].answer) }
+            { assertEquals(newQuiz2.title, actual[1].title) },
+            { assertEquals(newQuiz2.text, actual[1].text) },
+            { assertEquals(newQuiz2.options, actual[1].options) },
+            { assertEquals(newQuiz2.answer, actual[1].answer) }
         )
     }
 
     @Test
     fun `Removes all saved quizzes`() {
-        sut.addQuiz(quiz1)
-        sut.addQuiz(quiz1.copy(title = "Another title"))
+        sut.addQuiz(newQuiz1)
+        sut.addQuiz(newQuiz1.copy(title = "Another title"))
         assertTrue { sut.getAllQuizzes().size == 2 }
 
         sut.reset()

@@ -1,5 +1,12 @@
 package engine
 
+data class NewQuiz(
+    val title: String,
+    val text: String,
+    val options: List<String>,
+    val answer: Int,
+)
+
 @JvmInline
 value class QuizId(val value: Int)
 
