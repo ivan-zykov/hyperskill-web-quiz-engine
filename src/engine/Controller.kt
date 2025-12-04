@@ -1,7 +1,6 @@
 package engine
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -15,7 +14,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(quiz.toDto())
     }
 
@@ -25,7 +23,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(result.toDto())
     }
 
@@ -35,7 +32,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(createdIdToQuiz.toDto())
     }
 
@@ -45,7 +41,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(quiz.toDto())
     }
 
@@ -55,7 +50,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(quizzes.map { it.toDto() })
     }
 
@@ -68,7 +62,6 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
 
         return ResponseEntity
             .ok()
-            .contentType(MediaType.APPLICATION_JSON)
             .body(result.toDto())
     }
 }
