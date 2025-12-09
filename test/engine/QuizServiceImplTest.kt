@@ -30,7 +30,7 @@ class QuizServiceImplTest {
 
     @Test
     fun `Returns initial quiz`() {
-        val actual = sut.getQuiz()
+        val actual = sut.getInitialQuiz()
 
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
@@ -47,7 +47,7 @@ class QuizServiceImplTest {
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
         dynamicTest("answer $answerIdx is ${expected.success}") {
-            val actual = sut.checkAnswer(answer = answerIdx)
+            val actual = sut.solveInitialQuiz(answer = answerIdx)
 
             assertEquals(expected, actual)
         }
@@ -70,7 +70,7 @@ class QuizServiceImplTest {
     fun `Gets quiz with ID`() {
         sut.addQuiz(newQuiz1)
 
-        val actual = sut.getQuizWith(id = quiz1Id)
+        val actual = sut.getQuizBy(id = quiz1Id)
 
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
@@ -128,7 +128,7 @@ class QuizServiceImplTest {
         dynamicTest(displayName) {
             val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id!!
 
-            val actual = sut.solveQuizWith(id = addedQuizId, answer = answer)
+            val actual = sut.solveQuizBy(id = addedQuizId, answer = answer)
 
             assertEquals(expected, actual)
         }

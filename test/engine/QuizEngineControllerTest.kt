@@ -49,7 +49,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `GET quiz returns OK with one quiz`() {
+    fun `Getting initial quiz returns OK with one quiz`() {
         mockMvc.get("$API_PATH/quiz")
             .andExpectAll {
                 status { isOk() }
@@ -65,7 +65,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `POST quiz returns OK for correct answer`() {
+    fun `Solving initial quiz returns OK for correct answer`() {
         mockMvc.post("$API_PATH/quiz?answer=2")
             .andExpectAll {
                 status { isOk() }
@@ -76,7 +76,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @TestFactory
-    fun `POST quiz returns Bad request with`() = listOf(
+    fun `Solving initial quiz returns Bad request with`() = listOf(
         "",
         "a=2",
     ).map { requestParam ->
@@ -92,7 +92,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `POST quizzes returns OK with created quiz`() {
+    fun `Adding quiz returns OK with created quiz`() {
         mockMvc.post("$API_PATH/quizzes") {
             contentType = MediaType.APPLICATION_JSON
             content = quizSerialized1
@@ -109,7 +109,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @TestFactory
-    fun `POST quizzes returns Bad request for bad supplied body`() = buildList {
+    fun `Adding quiz returns Bad request for bad supplied body`() = buildList {
         add("" to "body")
 
         val bodyMissingTitle = mapper.createObjectNode()
@@ -142,7 +142,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `GET quizzes by id returns OK with one quiz`() {
+    fun `Getting quiz by id returns OK with one quiz`() {
         val addedQuizId = addQuiz(quizSerialized1).id.value
 
         mockMvc.get("$API_PATH/quizzes/${addedQuizId}")
@@ -158,7 +158,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `GET quizzes by id returns Not found for non-existing id`() {
+    fun `Getting quiz by id returns Not found for non-existing id`() {
         val quizId = 0
 
         mockMvc.get("$API_PATH/quizzes/$quizId")
@@ -171,7 +171,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `GET all quizzes returns empty array`() {
+    fun `Getting all quizzes returns empty array`() {
         mockMvc.get("$API_PATH/quizzes")
             .andExpectAll {
                 status { isOk() }
@@ -182,7 +182,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `GET all quizzes returns list with two`() {
+    fun `Getting all quizzes returns list with two`() {
         addQuiz(quizSerialized1)
         val quizSerialized2 = mapper.writeValueAsString(quiz.copy(title = "$TITLE 2"))
         addQuiz(quizSerialized2)
@@ -202,7 +202,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `POST quizzes-id-solve returns OK`() {
+    fun `Solving quiz by ID returns OK`() {
         val idOfAddedQuiz = addQuiz(quizSerialized1).id.value
 
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfAddedQuiz) {
@@ -217,7 +217,7 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `POST quizzes-id-solve returns Not found for non-existing quiz`() {
+    fun `Solving quiz by ID returns Not found for non-existing quiz`() {
         val idOfNonExistingQuiz = 1
 
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfNonExistingQuiz) {

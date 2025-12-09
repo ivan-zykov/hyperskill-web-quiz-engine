@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class QuizEngineController @Autowired constructor(private val quizService: QuizService) {
     @GetMapping("/quiz")
-    fun getQuiz(): ResponseEntity<QuizOutDto> {
-        val quiz = quizService.getQuiz()
+    fun getInitialQuiz(): ResponseEntity<QuizOutDto> {
+        val quiz = quizService.getInitialQuiz()
 
         return ResponseEntity
             .ok()
@@ -18,8 +18,8 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @PostMapping("/quiz")
-    fun answerQuiz(@RequestParam answer: Int): ResponseEntity<ResultDto> {
-        val result = quizService.checkAnswer(answer = answer)
+    fun solveInitialQuiz(@RequestParam answer: Int): ResponseEntity<ResultDto> {
+        val result = quizService.solveInitialQuiz(answer = answer)
 
         return ResponseEntity
             .ok()
@@ -36,8 +36,8 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @GetMapping("/quizzes/{id}")
-    fun showQuiz(@PathVariable id: QuizId): ResponseEntity<QuizOutDto> {
-        val quiz = quizService.getQuizWith(id)
+    fun getQuizBy(@PathVariable id: QuizId): ResponseEntity<QuizOutDto> {
+        val quiz = quizService.getQuizBy(id)
 
         return ResponseEntity
             .ok()
@@ -45,7 +45,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @GetMapping("/quizzes")
-    fun showAllQuizzes(): ResponseEntity<List<QuizOutDto>> {
+    fun getAllQuizzes(): ResponseEntity<List<QuizOutDto>> {
         val quizzes = quizService.getAllQuizzes()
 
         return ResponseEntity
@@ -54,11 +54,11 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @PostMapping("/quizzes/{id}/solve")
-    fun solveQuiz(
+    fun solveQuizBy(
         @PathVariable id: QuizId,
         @RequestParam answer: Int,
     ): ResponseEntity<ResultDto> {
-        val result = quizService.solveQuizWith(id, answer)
+        val result = quizService.solveQuizBy(id, answer)
 
         return ResponseEntity
             .ok()
@@ -86,10 +86,10 @@ private fun Quiz.toDto() = QuizOutDto(
 )
 
 interface QuizService {
-    fun getQuiz(): Quiz
-    fun checkAnswer(answer: Int): AnswerResult
+    fun getInitialQuiz(): Quiz
+    fun solveInitialQuiz(answer: Int): AnswerResult
     fun addQuiz(newQuiz: NewQuiz): Quiz
-    fun getQuizWith(id: QuizId): Quiz
+    fun getQuizBy(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
-    fun solveQuizWith(id: QuizId, answer: Int): AnswerResult
+    fun solveQuizBy(id: QuizId, answer: Int): AnswerResult
 }

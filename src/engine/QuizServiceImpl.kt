@@ -8,9 +8,9 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
 class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
-    override fun getQuiz(): Quiz = addInitialQuiz()
+    override fun getInitialQuiz(): Quiz = addInitialQuiz()
 
-    override fun checkAnswer(answer: Int): AnswerResult {
+    override fun solveInitialQuiz(answer: Int): AnswerResult {
         val initialQuiz = addInitialQuiz()
 
         val (success, feedback) = initialQuiz.check(answer)
@@ -23,15 +23,15 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 
     override fun addQuiz(newQuiz: NewQuiz): Quiz = quizzesRepo.addQuiz(newQuiz)
 
-    override fun getQuizWith(id: QuizId): Quiz = quizzesRepo.findQuizBy(id)
+    override fun getQuizBy(id: QuizId): Quiz = quizzesRepo.findQuizBy(id)
 
     override fun getAllQuizzes(): List<Quiz> = quizzesRepo.getAllQuizzes()
 
-    override fun solveQuizWith(
+    override fun solveQuizBy(
         id: QuizId,
         answer: Int
     ): AnswerResult {
-        val quiz = getQuizWith(id)
+        val quiz = getQuizBy(id)
 
         val (success, feedback) = quiz.check(answer)
 
