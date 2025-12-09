@@ -42,7 +42,7 @@ class QuizServiceImplTest {
     }
 
     @TestFactory
-    fun `Checking quiz result for`() = listOf(
+    fun `Checking quiz result for initial quiz with`() = listOf(
         2 to AnswerResult(success = true, feedback = CONGRATULATIONS),
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
@@ -113,7 +113,7 @@ class QuizServiceImplTest {
     }
 
     @TestFactory
-    fun `Solve quiz with`() = listOf(
+    fun `Solve quiz by ID with`() = listOf(
         Triple(
             "correct answer",
             listOf(2),
