@@ -20,7 +20,7 @@ class QuizServiceImplTest {
         title = "The Java Logo",
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
-        answer = 2,
+        answer = listOf(2),
     )
 
     @BeforeEach
@@ -116,12 +116,12 @@ class QuizServiceImplTest {
     fun `Solve quiz with`() = listOf(
         Triple(
             "correct answer",
-            2,
+            listOf(2),
             AnswerResult(success = true, feedback = CONGRATULATIONS)
         ),
         Triple(
             "wrong answer",
-            0,
+            listOf(0),
             AnswerResult(success = false, feedback = WRONG_ANSWER)
         )
     ).map { (displayName, answer, expected) ->

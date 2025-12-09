@@ -13,7 +13,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
     override fun solveInitialQuiz(answer: Int): AnswerResult {
         val initialQuiz = addInitialQuiz()
 
-        val (success, feedback) = initialQuiz.check(answer)
+        val (success, feedback) = initialQuiz.check(listOf(answer))
 
         return AnswerResult(
             success = success,
@@ -29,7 +29,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 
     override fun solveQuizBy(
         id: QuizId,
-        answer: Int
+        answer: List<Int>
     ): AnswerResult {
         val quiz = getQuizBy(id)
 
@@ -46,7 +46,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
             title = "The Java Logo",
             text = "What is depicted on the Java logo?",
             options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
-            answer = 2,
+            answer = listOf(2),
         )
     )
 
@@ -58,8 +58,10 @@ interface QuizzesRepository {
     fun getAllQuizzes(): List<Quiz>
 }
 
-private fun Quiz.check(answer: Int) =
-    if (this.answer == answer) {
+private fun Quiz.check(answer: List<Int>) =
+    if (this.answer?.toSet() == answer.toSet() ||
+        (this.answer == null && answer.isEmpty())
+    ) {
         true to CONGRATULATIONS
     } else {
         false to WRONG_ANSWER

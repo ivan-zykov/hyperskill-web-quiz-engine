@@ -56,7 +56,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     @PostMapping("/quizzes/{id}/solve")
     fun solveQuizBy(
         @PathVariable id: QuizId,
-        @RequestParam answer: Int,
+        @RequestParam answer: List<Int>,
     ): ResponseEntity<ResultDto> {
         val result = quizService.solveQuizBy(id, answer)
 
@@ -91,5 +91,5 @@ interface QuizService {
     fun addQuiz(newQuiz: NewQuiz): Quiz
     fun getQuizBy(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
-    fun solveQuizBy(id: QuizId, answer: Int): AnswerResult
+    fun solveQuizBy(id: QuizId, answer: List<Int>): AnswerResult
 }

@@ -31,7 +31,7 @@ private val quiz = QuizInDto(
     title = TITLE,
     text = TEXT,
     options = listOf(OPTION),
-    answer = 0,
+    answer = listOf(0),
 )
 
 @SpringBootTest

@@ -16,7 +16,7 @@ class InMemoryQuizzesRepositoryTest {
         title = "The Java Logo",
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
-        answer = 2,
+        answer = listOf(2),
     )
 
     @BeforeEach
@@ -26,7 +26,7 @@ class InMemoryQuizzesRepositoryTest {
 
     @Test
     fun `Adds a quiz`() {
-        val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id!!
+        val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id
 
         val actual = sut.findQuizBy(addedQuizId)
         assertAll(
