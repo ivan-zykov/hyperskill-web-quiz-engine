@@ -126,7 +126,7 @@ class QuizServiceImplTest {
         )
     ).map { (displayName, answer, expected) ->
         dynamicTest(displayName) {
-            val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id!!
+            val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id
 
             val actual = sut.solveQuizBy(id = addedQuizId, answer = answer)
 
