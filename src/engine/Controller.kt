@@ -1,5 +1,6 @@
 package engine
 
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -27,7 +28,7 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @PostMapping("/quizzes")
-    fun addQuiz(@RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
+    fun addQuiz(@Valid @RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
         val createdQuiz = quizService.addQuiz(quiz.toNewQuiz())
 
         return ResponseEntity

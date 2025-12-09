@@ -1,6 +1,5 @@
 package engine
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.hamcrest.Matchers.containsString
@@ -109,34 +108,48 @@ class QuizEngineControllerTest @Autowired constructor(
     }
 
     @TestFactory
-    fun `Adding quiz returns Bad request for bad supplied body`() = buildList {
-        add("" to "body")
+    fun `Adding quiz returns Bad request when validation fails for title field in request's body`() = buildList {
+        add(
+            Triple(
+                "Body missing",
+                "",
+                "body"
+            )
+        )
 
-        val bodyMissingTitle = mapper.createObjectNode()
+        val bodyTitleMissing = mapper.createObjectNode()
+            .toString()
+        add(
+            Triple(
+                "Title field missing",
+                bodyTitleMissing,
+                "title"
+            )
+        )
+
+        val bodyTitleBlank = mapper.createObjectNode()
+            .put("title", "")
             .put("text", TEXT)
-            .toString()
-        add(bodyMissingTitle to "title")
-
-        val bodyTitleNull = mapper.createObjectNode()
-            .putNull("text")
-            .toString()
-        add(bodyTitleNull to "title")
-
-        val bodyMissingAnswer = mapper.createObjectNode()
-            .put("title", TITLE)
-            .put("text", TEXT)
-            .set<JsonNode>("options", mapper.valueToTree(listOf(OPTION)))
-            .toString()
-        add(bodyMissingAnswer to "answer")
-    }.map { (body, missingField) ->
-        dynamicTest("like: $body") {
+        bodyTitleBlank
+            .putArray("options")
+            .add(OPTION)
+            .add(OPTION)
+        add(
+            Triple(
+                "Title field blank",
+                bodyTitleBlank.toString(),
+                "title"
+            )
+        )
+    }.map { (displayName, body, errorMessageSubstring) ->
+        dynamicTest(displayName) {
             mockMvc.post("$API_PATH/quizzes") {
                 contentType = MediaType.APPLICATION_JSON
                 content = body
             }
                 .andExpectAll {
                     status { isBadRequest() }
-                    jsonPath("$.error") { value(containsString(missingField)) }
+                    jsonPath("$.error") { value(containsString(errorMessageSubstring)) }
                 }
         }
     }

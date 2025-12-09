@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -35,6 +36,24 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         request: WebRequest
     ): ResponseEntity<in Any>? {
         val body = makeErrorBodyFor(ex)
+
+        return ResponseEntity(body, headers, HttpStatus.BAD_REQUEST)
+    }
+
+    override fun handleMethodArgumentNotValid(
+        ex: MethodArgumentNotValidException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<in Any>? {
+        val errorMessages: List<String> = buildList {
+            ex.bindingResult.allErrors.forEach { error ->
+                error?.defaultMessage?.let { add(it) }
+            }
+        }
+        val body: ErrorBody = mapOf(
+            "error" to errorMessages.joinToString("; ")
+        )
 
         return ResponseEntity(body, headers, HttpStatus.BAD_REQUEST)
     }

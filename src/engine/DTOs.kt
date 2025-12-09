@@ -1,5 +1,8 @@
 package engine
 
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
+
 class QuizOutDto(
     val id: QuizId,
     val title: String,
@@ -14,8 +17,11 @@ class ResultDto(
 )
 
 data class QuizInDto(
+    @field:NotBlank(message = "Field title must be not blank")
     val title: String,
+    @field:NotBlank(message = "Field text must be not blank")
     val text: String,
+    @field:Size(min = 2, message = "Field options should have at least two elements")
     val options: List<String>,
     val answer: List<Int>?,
 )
