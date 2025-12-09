@@ -133,4 +133,15 @@ class QuizServiceImplTest {
             assertEquals(expected, actual)
         }
     }
+
+    @Test
+    fun `Solve quiz with answers = null and empty provided answer`() {
+        val quizWithNullAnswer = newQuiz1.copy(answer = null)
+        val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer).id
+
+        val actual = sut.solveQuizBy(id = addedQuizId, answer = listOf())
+
+        assertEquals(true, actual.success)
+        assertEquals(CONGRATULATIONS, actual.feedback)
+    }
 }
