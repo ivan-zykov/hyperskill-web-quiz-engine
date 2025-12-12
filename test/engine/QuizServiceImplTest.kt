@@ -116,12 +116,12 @@ class QuizServiceImplTest {
     fun `Solves quiz by ID with`() = listOf(
         Triple(
             "correct answer",
-            listOf(2),
+            Answer(listOf(2)),
             AnswerResult(success = true, feedback = CONGRATULATIONS)
         ),
         Triple(
             "wrong answer",
-            listOf(0, 1),
+            Answer(listOf(0, 1)),
             AnswerResult(success = false, feedback = WRONG_ANSWER)
         )
     ).map { (displayName, answer, expected) ->
@@ -139,7 +139,7 @@ class QuizServiceImplTest {
         val quizWithNullAnswer = newQuiz1.copy(answer = null)
         val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer).id
 
-        val actual = sut.solveQuizBy(id = addedQuizId, answer = listOf())
+        val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf()))
 
         assertEquals(true, actual.success)
         assertEquals(CONGRATULATIONS, actual.feedback)

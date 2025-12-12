@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,7 +30,7 @@ private const val CONGRATULATIONS = "Congratulations, you're right!"
 private val quiz = QuizInDto(
     title = TITLE,
     text = TEXT,
-    options = listOf(OPTION),
+    options = listOf(OPTION, OPTION),
     answer = listOf(0),
 )
 
@@ -216,10 +217,14 @@ class QuizEngineControllerTest @Autowired constructor(
 
     @Test
     fun `Solving quiz by ID returns OK`() {
-        val idOfAddedQuiz = addQuiz(quizSerialized1).id.value
+        val addedQuiz = addQuiz(quizSerialized1)
+        val idOfAddedQuiz = addedQuiz.id.value
+        val answer = mapper.writeValueAsString(AnswerDto(listOf(0)))
+            ?: fail { "Failed to serialize answer" }
 
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfAddedQuiz) {
-            param("answer", 0.toString())
+            contentType = MediaType.APPLICATION_JSON
+            content = answer
         }
             .andExpectAll {
                 status { isOk() }
@@ -232,9 +237,11 @@ class QuizEngineControllerTest @Autowired constructor(
     @Test
     fun `Solving quiz by ID returns Not found for non-existing quiz`() {
         val idOfNonExistingQuiz = 1
+        val answer = mapper.writeValueAsString(AnswerDto(listOf()))
 
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfNonExistingQuiz) {
-            param("answer", 0.toString())
+            contentType = MediaType.APPLICATION_JSON
+            content = answer
         }.andExpectAll {
             status { isNotFound() }
             content { contentType(MediaType.APPLICATION_JSON) }

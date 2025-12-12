@@ -25,3 +25,5 @@ data class QuizInDto(
     val options: List<String>,
     val answer: List<Int>?,
 )
+
+class AnswerDto(val answer: List<Int>)

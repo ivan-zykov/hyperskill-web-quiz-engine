@@ -22,3 +22,6 @@ data class AnswerResult(
     val success: Boolean,
     val feedback: String
 )
+
+@JvmInline
+value class Answer(val value: List<Int>)

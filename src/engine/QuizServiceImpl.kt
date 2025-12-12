@@ -13,7 +13,8 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
     override fun solveInitialQuiz(answer: Int): AnswerResult {
         val initialQuiz = addInitialQuiz()
 
-        val (success, feedback) = initialQuiz.check(listOf(answer))
+        val answerWrapped = Answer(listOf(answer))
+        val (success, feedback) = initialQuiz.check(answerWrapped)
 
         return AnswerResult(
             success = success,
@@ -29,7 +30,7 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 
     override fun solveQuizBy(
         id: QuizId,
-        answer: List<Int>
+        answer: Answer
     ): AnswerResult {
         val quiz = getQuizBy(id)
 
@@ -58,9 +59,9 @@ interface QuizzesRepository {
     fun getAllQuizzes(): List<Quiz>
 }
 
-private fun Quiz.check(answer: List<Int>) =
-    if (this.answer?.toSet() == answer.toSet() ||
-        (this.answer == null && answer.isEmpty())
+private fun Quiz.check(answer: Answer) =
+    if (this.answer?.toSet() == answer.value.toSet() ||
+        (this.answer == null && answer.value.isEmpty())
     ) {
         true to CONGRATULATIONS
     } else {
