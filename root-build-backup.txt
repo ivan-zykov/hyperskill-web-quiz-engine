@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
 
-    def myCustomKotlinVer = "2.2.0"
+    def myCustomKotlinVer = "2.1.21"
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$myCustomKotlinVer"
     }

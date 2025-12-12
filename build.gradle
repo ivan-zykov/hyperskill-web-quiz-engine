@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 def myCustomJavaVer = 23
 
 buildscript {
-    def myCustomKotlinVer = "2.2.0"
+    def myCustomKotlinVer = "2.1.21"
     repositories {
         mavenCentral()
     }
