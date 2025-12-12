@@ -29,7 +29,7 @@ class QuizServiceImplTest {
     }
 
     @Test
-    fun `Returns initial quiz`() {
+    fun `Gets initial quiz`() {
         val actual = sut.getInitialQuiz()
 
         assertAll(
@@ -42,7 +42,7 @@ class QuizServiceImplTest {
     }
 
     @TestFactory
-    fun `Checking quiz result for initial quiz with`() = listOf(
+    fun `Solves initial quiz with`() = listOf(
         2 to AnswerResult(success = true, feedback = CONGRATULATIONS),
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
@@ -67,7 +67,7 @@ class QuizServiceImplTest {
     }
 
     @Test
-    fun `Gets quiz with ID`() {
+    fun `Gets quiz by ID`() {
         sut.addQuiz(newQuiz1)
 
         val actual = sut.getQuizBy(id = quiz1Id)
@@ -113,7 +113,7 @@ class QuizServiceImplTest {
     }
 
     @TestFactory
-    fun `Solve quiz by ID with`() = listOf(
+    fun `Solves quiz by ID with`() = listOf(
         Triple(
             "correct answer",
             listOf(2),
@@ -121,7 +121,7 @@ class QuizServiceImplTest {
         ),
         Triple(
             "wrong answer",
-            listOf(0),
+            listOf(0, 1),
             AnswerResult(success = false, feedback = WRONG_ANSWER)
         )
     ).map { (displayName, answer, expected) ->
@@ -135,7 +135,7 @@ class QuizServiceImplTest {
     }
 
     @Test
-    fun `Solve quiz with answers = null and empty provided answer`() {
+    fun `Solves quiz with answers = null and empty provided answer`() {
         val quizWithNullAnswer = newQuiz1.copy(answer = null)
         val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer).id
 
