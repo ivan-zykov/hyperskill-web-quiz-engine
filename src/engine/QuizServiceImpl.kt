@@ -53,12 +53,6 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 
 }
 
-interface QuizzesRepository {
-    fun addQuiz(newQuiz: NewQuiz): Quiz
-    fun findQuizBy(id: QuizId): Quiz
-    fun getAllQuizzes(): List<Quiz>
-}
-
 private fun Quiz.check(answer: Answer) =
     if (this.answer?.toSet() == answer.value.toSet() ||
         (this.answer == null && answer.value.isEmpty())
