@@ -1,9 +1,11 @@
 package engine
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Repository
 
 @Repository
+@Profile("jpa")
 class JpaQuizzesRepositoryAdapter @Autowired constructor(
     private val jpa: JpaQuizzesRepository
 ) : QuizzesRepository {

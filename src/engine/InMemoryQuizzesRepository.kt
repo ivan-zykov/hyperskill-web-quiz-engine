@@ -1,10 +1,12 @@
 package engine
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Repository
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Repository
+@Profile("in-memory")
 class InMemoryQuizzesRepository : QuizzesRepository {
     private val quizzes: ConcurrentMap<QuizId, Quiz> = ConcurrentHashMap()
     private var nextQuizIdValue = 1
