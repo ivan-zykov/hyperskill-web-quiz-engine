@@ -19,12 +19,14 @@ class JpaQuizzesRepositoryAdapter @Autowired constructor(
 
     override fun findQuizBy(id: QuizId): Quiz =
         jpa.findById(id.value.toLong())
-            .orElseThrow { NoSuchElementException("Error. Failed to fetch quiz with ID: {$id.value}") }
+            .orElseThrow { QuizNotFoundException("Error. Failed to fetch quiz with ID: {$id.value}") }
             .toDomain()
 
     override fun getAllQuizzes(): List<Quiz> =
         jpa.findAll()
             .map { it.toDomain() }
+
+    override fun reset() = jpa.deleteAll()
 }
 
 private fun NewQuiz.toEntity(): QuizEntity {

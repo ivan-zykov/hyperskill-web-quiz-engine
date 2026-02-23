@@ -25,7 +25,7 @@ class InMemoryQuizzesRepository : QuizzesRepository {
 
     override fun getAllQuizzes(): List<Quiz> = quizzes.values.toList()
 
-    fun reset() {
+    override fun reset() {
         quizzes.clear()
     }
 
@@ -44,5 +44,3 @@ class InMemoryQuizzesRepository : QuizzesRepository {
     }
 
 }
-
-class QuizNotFoundException(message: String) : RuntimeException(message)
