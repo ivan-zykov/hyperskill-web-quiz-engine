@@ -1,0 +1,3 @@
+- Split config in: common, -inmemory, -jpa
+- todo: Use env var SPRING_PROFILES_ACTIVE to pick the config file on app boot
+- Add to README, how set the profile
