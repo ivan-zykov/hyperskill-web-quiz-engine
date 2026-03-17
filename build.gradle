@@ -63,6 +63,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'   // Helpful for Gradle/IDE runs. Version comes from the BOM
 }
 
+springBoot {
+    mainClass = 'engine.WebQuizEngineKt'
+}
+
 tasks.withType(KotlinCompile) {
     kotlinOptions {
         freeCompilerArgs = ['-Xjsr305=strict', '-Xannotation-default-target=param-property']
