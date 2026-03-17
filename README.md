@@ -13,9 +13,8 @@ Layered design (Controller → Service → Repository) with interchangeable repo
 
 ## Requirements
 
-Java 23
-
-This version is required by the Hyperskill course checks and project setup. Higher versions not tested
+- Java 23. This version is required by the Hyperskill course checks and project setup. Higher versions not tested
+- Local Gradle. Wrapper is not included due to Hyperskill submodule structure
 
 ## Run
 
