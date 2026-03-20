@@ -1,13 +1,20 @@
 package engine
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
 class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
+
+    private val logger: Logger = LoggerFactory.getLogger(QuizServiceImpl::class.java)
+
     override fun getInitialQuiz(): Quiz = addInitialQuiz()
 
     override fun solveInitialQuiz(answer: Int): AnswerResult {
@@ -24,7 +31,8 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
 
     override fun addQuiz(newQuiz: NewQuiz): Quiz = quizzesRepo.addQuiz(newQuiz)
 
-    override fun getQuizBy(id: QuizId): Quiz = quizzesRepo.findQuizBy(id)
+    override fun getQuizBy(id: QuizId): Quiz =
+        logExecutionTimeWithMessage("Getting a quiz with ID ${id.value} took") { quizzesRepo.findQuizBy(id) }
 
     override fun getAllQuizzes(): List<Quiz> = quizzesRepo.getAllQuizzes()
 
@@ -40,6 +48,19 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
             success = success,
             feedback = feedback,
         )
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun <T> logExecutionTimeWithMessage(
+        actionDescription: String,
+        block: () -> T,
+    ): T {
+        val start = Clock.System.now()
+        val result = block.invoke()
+        val duration = (Clock.System.now() - start).inWholeMilliseconds
+        logger.info("$actionDescription $duration millisecond(s)")
+
+        return result
     }
 
     private fun addInitialQuiz() = addQuiz(
