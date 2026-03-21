@@ -10,7 +10,6 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.fail
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -36,7 +35,7 @@ private val quiz = QuizInDto(
 
 @SpringBootTest
 @AutoConfigureMockMvc
-abstract class ControllerTest @Autowired constructor(
+abstract class ControllerTest (
     private val mockMvc: MockMvc,
     private val quizzesRepository: QuizzesRepository,
     private val mapper: ObjectMapper

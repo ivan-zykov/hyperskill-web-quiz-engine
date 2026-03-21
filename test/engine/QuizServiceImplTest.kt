@@ -6,14 +6,13 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertAll
-import org.springframework.beans.factory.annotation.Autowired
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 class QuizServiceImplTest {
-    private val quizzesRepository = @Autowired InMemoryQuizzesRepository()
-    private val sut = @Autowired QuizServiceImpl(quizzesRepository)
+    private val quizzesRepository = InMemoryQuizzesRepository()
+    private val sut = QuizServiceImpl(quizzesRepository)
 
     private val quiz1Id = QuizId(1)
     private val newQuiz1 = NewQuiz(
