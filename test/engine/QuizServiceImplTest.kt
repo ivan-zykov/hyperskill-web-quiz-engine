@@ -6,13 +6,20 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertAll
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import java.util.Optional
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 class QuizServiceImplTest {
     private val quizzesRepository = InMemoryQuizzesRepository()
-    private val sut = QuizServiceImpl(quizzesRepository)
+
+    private val sut = QuizServiceImpl(
+        quizzesRepository,
+        UserRepoStubbed,
+        BCryptPasswordEncoder(7)
+    )
 
     private val quiz1Id = QuizId(1)
     private val newQuiz1 = NewQuiz(
@@ -143,4 +150,59 @@ class QuizServiceImplTest {
         assertEquals(true, actual.success)
         assertEquals(CONGRATULATIONS, actual.feedback)
     }
+}
+
+object UserRepoStubbed : AppUserRepository {
+    override fun findByUsername(username: String): AppUser? {
+        TODO("Not yet implemented")
+    }
+
+    override fun <S : AppUser?> save(entity: S & Any): S & Any {
+        TODO("Not yet implemented")
+    }
+
+    override fun <S : AppUser?> saveAll(entities: Iterable<S?>): Iterable<S?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun findById(id: Int): Optional<AppUser?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun existsById(id: Int): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun findAll(): Iterable<AppUser?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun findAllById(ids: Iterable<Int?>): Iterable<AppUser?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun count(): Long {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteById(id: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun delete(entity: AppUser) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteAllById(ids: Iterable<Int?>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteAll(entities: Iterable<AppUser?>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteAll() {
+        TODO("Not yet implemented")
+    }
+
 }

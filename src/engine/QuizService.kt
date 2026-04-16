@@ -7,4 +7,5 @@ interface QuizService {
     fun getQuizBy(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
     fun solveQuizBy(id: QuizId, answer: Answer): AnswerResult
+    fun registerNewUser(credentials: UserCredentials)
 }

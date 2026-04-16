@@ -72,6 +72,13 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity<ErrorBody>(body, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(DuplicatedUserException::class)
+    fun handleDuplicatedUser(exception: DuplicatedUserException): ResponseEntity<ErrorBody> {
+        val body = makeErrorBodyFor(exception)
+
+        return ResponseEntity<ErrorBody>(body, HttpStatus.BAD_REQUEST)
+    }
+
     private fun makeErrorBodyFor(ex: Exception): ErrorBody =
         mapOf("error" to (ex.message ?: ""))
 }

@@ -3,6 +3,7 @@ package engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -11,7 +12,11 @@ private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
-class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRepository) : QuizService {
+class QuizServiceImpl @Autowired constructor(
+    private val quizzesRepo: QuizzesRepository,
+    private val userRepository: AppUserRepository,
+    private val passwordEncoder: PasswordEncoder,
+) : QuizService {
 
     private val logger: Logger = LoggerFactory.getLogger(QuizServiceImpl::class.java)
 
@@ -48,6 +53,18 @@ class QuizServiceImpl @Autowired constructor(private val quizzesRepo: QuizzesRep
             success = success,
             feedback = feedback,
         )
+    }
+
+    override fun registerNewUser(credentials: UserCredentials) {
+        val existingUser = userRepository.findByUsername(credentials.email)
+        if (existingUser != null) {
+            throw DuplicatedUserException("User with email ${credentials.email} already exists")
+        }
+        val newUser = AppUser(
+            username = credentials.email,
+            password = passwordEncoder.encode(credentials.password)
+        )
+        userRepository.save(newUser)
     }
 
     @OptIn(ExperimentalTime::class)

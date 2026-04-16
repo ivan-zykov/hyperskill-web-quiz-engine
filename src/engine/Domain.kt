@@ -25,3 +25,21 @@ data class AnswerResult(
 
 @JvmInline
 value class Answer(val value: List<Int>)
+
+data class UserCredentials(
+    val email: String,
+    val password: String
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserCredentials
+
+        return email == other.email
+    }
+
+    override fun hashCode(): Int {
+        return email.hashCode()
+    }
+}
