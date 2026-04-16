@@ -65,6 +65,11 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
             .ok()
             .body(result.toDto())
     }
+
+    @PostMapping("/register")
+    fun registerNewUser(@Valid @RequestBody newCredentials: UserCredentialsDTO) {
+        TODO("POST /register not yet implemented")
+    }
 }
 
 private fun AnswerDto.toDomain(): Answer = Answer(this.answer)
