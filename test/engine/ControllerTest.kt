@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.fail
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -35,6 +36,7 @@ private val quiz = QuizInDto(
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(SecurityConfig::class)
 abstract class ControllerTest (
     private val mockMvc: MockMvc,
     private val quizzesRepository: QuizzesRepository,
