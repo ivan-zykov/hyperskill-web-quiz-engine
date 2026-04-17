@@ -34,6 +34,11 @@ private val quiz = QuizInDto(
     answer = listOf(0),
 )
 
+private val userCredentials = UserCredentialsDTO(
+    email = "vanya@mail.com",
+    password = "12345"
+)
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityConfig::class)
@@ -253,17 +258,30 @@ abstract class ControllerTest(
 
     @Test
     fun `Registering new user returns OK`() {
-        val credentials = UserCredentialsDTO(
-            email = "vanya@mail.com",
-            password = "12345"
-        )
-
         mockMvc.post("$API_PATH/register") {
             contentType = MediaType.APPLICATION_JSON
-            content = mapper.writeValueAsString(credentials)
+            content = mapper.writeValueAsString(userCredentials)
         }
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    fun `Registering duplicate new user returns Bad request`() {
+        mockMvc.post("$API_PATH/register") {
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(userCredentials)
+        }
+
+        mockMvc.post("$API_PATH/register") {
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(userCredentials)
+        }
+            .andExpect {
+                status { isBadRequest() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.error") { value("User with email ${userCredentials.email} already exists") }
             }
     }
 
