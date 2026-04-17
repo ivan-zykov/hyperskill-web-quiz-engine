@@ -37,7 +37,7 @@ private val quiz = QuizInDto(
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityConfig::class)
-abstract class ControllerTest (
+abstract class ControllerTest(
     private val mockMvc: MockMvc,
     private val quizzesRepository: QuizzesRepository,
     private val mapper: ObjectMapper
@@ -249,6 +249,22 @@ abstract class ControllerTest (
             jsonPath("$.error") { value(containsString("Error")) }
             jsonPath("$.error") { value(containsString(idOfNonExistingQuiz.toString())) }
         }
+    }
+
+    @Test
+    fun `Registering new user returns OK`() {
+        val credentials = UserCredentialsDTO(
+            email = "vanya@mail.com",
+            password = "12345"
+        )
+
+        mockMvc.post("$API_PATH/register") {
+            contentType = MediaType.APPLICATION_JSON
+            content = mapper.writeValueAsString(credentials)
+        }
+            .andExpect {
+                status { isOk() }
+            }
     }
 
     private fun addQuiz(quizSerialized: String): QuizOutDto {
