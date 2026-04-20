@@ -11,11 +11,13 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.test.context.ActiveProfiles
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @DataJpaTest
+@ActiveProfiles("test")
 class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRepository) {
     private lateinit var sut: QuizServiceImpl
 
