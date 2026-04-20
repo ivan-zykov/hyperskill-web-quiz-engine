@@ -3,6 +3,7 @@ package engine
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -16,7 +17,10 @@ class SecurityConfig {
     fun createSecurityFilterChain(@Autowired http: HttpSecurity): SecurityFilterChain {
         http {
             authorizeHttpRequests {
-                authorize(anyRequest, permitAll)
+                authorize(HttpMethod.POST,"/actuator/shutdown", permitAll) // Required by course task
+                authorize(HttpMethod.POST, "/api/register", permitAll)
+                authorize("/api/**", authenticated)
+                authorize(anyRequest, denyAll)
             }
             httpBasic { }
             csrf { disable() }
