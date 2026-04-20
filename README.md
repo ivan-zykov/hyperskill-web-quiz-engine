@@ -61,6 +61,7 @@ http://localhost:8889
 ## Future improvements
 
 - Handle authentication exceptions
+- Specify authorization for each /api/** endpoint explicitly
 - Replace H2 with PostgreSQL for production-like persistence
 - Align project structure with standard Gradle conventions
 
