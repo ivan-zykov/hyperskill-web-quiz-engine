@@ -32,7 +32,7 @@ class AnswerDto(val answer: List<Int>)
 
 class UserCredentialsDTO(
     @field:NotNull(message = "Field email must be not null")
-    @field:Email(message = "Field email must be a valid email")
+    @field:Email(regexp = ".+@.+\\..+",message = "Field email must be a valid email")
     val email: String,
 
     @field:Size(min = 5, message = "Field password must have at least five characters")
