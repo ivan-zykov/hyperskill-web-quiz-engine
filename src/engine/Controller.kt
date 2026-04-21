@@ -3,6 +3,8 @@ package engine
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 
 @Suppress("unused")
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class QuizEngineController @Autowired constructor(private val quizService: QuizService) {
     @GetMapping("/quiz")
-    fun getInitialQuiz(): ResponseEntity<QuizOutDto> {
-        val quiz = quizService.getInitialQuiz()
+    fun getInitialQuiz(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<QuizOutDto> {
+        val quiz = quizService.getInitialQuiz(userDetails)
 
         return ResponseEntity
             .ok()
@@ -19,8 +21,11 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @PostMapping("/quiz")
-    fun solveInitialQuiz(@RequestParam answer: Int): ResponseEntity<ResultDto> {
-        val result = quizService.solveInitialQuiz(answer = answer)
+    fun solveInitialQuiz(
+        @RequestParam answer: Int,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<ResultDto> {
+        val result = quizService.solveInitialQuiz(answer = answer, userDetails)
 
         return ResponseEntity
             .ok()
@@ -28,8 +33,11 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @PostMapping("/quizzes")
-    fun addQuiz(@Valid @RequestBody quiz: QuizInDto): ResponseEntity<QuizOutDto> {
-        val createdQuiz = quizService.addQuiz(quiz.toNewQuiz())
+    fun addQuiz(
+        @Valid @RequestBody quiz: QuizInDto,
+        @AuthenticationPrincipal userDetails: UserDetails,
+    ): ResponseEntity<QuizOutDto> {
+        val createdQuiz = quizService.addQuiz(quiz.toNewQuiz(), userDetails)
 
         return ResponseEntity
             .ok()
@@ -89,6 +97,7 @@ private fun QuizInDto.toNewQuiz() = NewQuiz(
     text = text,
     options = options,
     answer = answer,
+    authorUsername = null,
 )
 
 private fun Quiz.toDto() = QuizOutDto(

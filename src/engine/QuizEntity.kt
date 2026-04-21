@@ -26,4 +26,8 @@ class QuizEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "answers")
     var answers: List<Int>? = null
+
+    @ManyToOne
+    @JoinColumn(name = "author")
+    var author: AppUser? = null
 }

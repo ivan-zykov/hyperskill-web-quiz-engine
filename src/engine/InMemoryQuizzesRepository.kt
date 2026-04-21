@@ -39,6 +39,7 @@ class InMemoryQuizzesRepository : QuizzesRepository {
             options = newQuiz.options,
             answer = newQuiz.answer,
             id = newId,
+            authorUsername = newQuiz.authorUsername ?: "",
         )
         quizzes[newId] = quiz
     }

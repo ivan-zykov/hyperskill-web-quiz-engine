@@ -5,6 +5,7 @@ data class NewQuiz(
     val text: String,
     val options: List<String>,
     val answer: List<Int>?,
+    var authorUsername: String?,
 )
 
 @JvmInline
@@ -16,6 +17,7 @@ data class Quiz(
     val options: List<String>,
     val answer: List<Int>?,
     val id: QuizId,
+    val authorUsername: String,
 )
 
 data class AnswerResult(

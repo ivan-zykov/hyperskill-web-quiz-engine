@@ -12,7 +12,6 @@ class JpaQuizzesRepositoryAdapter @Autowired constructor(
     override fun addQuiz(newQuiz: NewQuiz): Quiz {
         val entity = newQuiz.toEntity()
         val savedEntity = jpa.save(entity)
-        checkNotNull(savedEntity) { "Error. Failed to save new quiz" }
 
         return savedEntity.toDomain()
     }
@@ -45,6 +44,7 @@ private fun QuizEntity.toDomain(): Quiz {
         text = this.text ?: "",
         options = this.options ?: emptyList(),
         answer = this.answers,
-        id = QuizId(this.id?.toInt() ?: -1)
+        id = QuizId(this.id?.toInt() ?: -1),
+        authorUsername = this.author?.username ?: "",
     )
 }

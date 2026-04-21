@@ -3,6 +3,7 @@ package engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import kotlin.time.Clock
@@ -20,10 +21,10 @@ class QuizServiceImpl @Autowired constructor(
 
     private val logger: Logger = LoggerFactory.getLogger(QuizServiceImpl::class.java)
 
-    override fun getInitialQuiz(): Quiz = addInitialQuiz()
+    override fun getInitialQuiz(userDetails: UserDetails): Quiz = addInitialQuiz(userDetails)
 
-    override fun solveInitialQuiz(answer: Int): AnswerResult {
-        val initialQuiz = addInitialQuiz()
+    override fun solveInitialQuiz(answer: Int, userDetails: UserDetails): AnswerResult {
+        val initialQuiz = addInitialQuiz(userDetails)
 
         val answerWrapped = Answer(listOf(answer))
         val (success, feedback) = initialQuiz.check(answerWrapped)
@@ -34,7 +35,10 @@ class QuizServiceImpl @Autowired constructor(
         )
     }
 
-    override fun addQuiz(newQuiz: NewQuiz): Quiz = quizzesRepo.addQuiz(newQuiz)
+    override fun addQuiz(newQuiz: NewQuiz, userDetails: UserDetails): Quiz {
+        newQuiz.authorUsername = userDetails.username
+        return quizzesRepo.addQuiz(newQuiz)
+    }
 
     override fun getQuizBy(id: QuizId): Quiz =
         logExecutionTimeWithMessage("Getting a quiz with ID ${id.value} took") { quizzesRepo.findQuizBy(id) }
@@ -80,15 +84,16 @@ class QuizServiceImpl @Autowired constructor(
         return result
     }
 
-    private fun addInitialQuiz() = addQuiz(
+    private fun addInitialQuiz(userDetails: UserDetails) = addQuiz(
         NewQuiz(
             title = "The Java Logo",
             text = "What is depicted on the Java logo?",
             options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
             answer = listOf(2),
-        )
+            authorUsername = null,
+        ),
+        userDetails
     )
-
 }
 
 private fun Quiz.check(answer: Answer) =

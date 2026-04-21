@@ -1,15 +1,11 @@
 package engine
 
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest.dynamicTest
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 
@@ -20,6 +16,13 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 @ActiveProfiles("test")
 class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRepository) {
     private lateinit var sut: QuizServiceImpl
+
+    private val user = AppUser(
+        id = 1,
+        username = "test@user.com",
+        password = "testPass"
+    )
+    private val userDetails: UserDetails = AppUserAdapter(user)
 
     @BeforeEach
     fun setUp() {
@@ -37,6 +40,7 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
         answer = listOf(2),
+        authorUsername = null,
     )
     private val userCredentials = UserCredentials(
         email = "vanya@mail.com",
@@ -45,14 +49,15 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
 
     @Test
     fun `Gets initial quiz`() {
-        val actual = sut.getInitialQuiz()
+        val actual = sut.getInitialQuiz(userDetails)
 
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
             { assertEquals(newQuiz1.title, actual.title) },
             { assertEquals(newQuiz1.text, actual.text) },
             { assertEquals(newQuiz1.options, actual.options) },
-            { assertEquals(newQuiz1.answer, actual.answer) }
+            { assertEquals(newQuiz1.answer, actual.answer) },
+            { assertEquals(user.username, actual.authorUsername) }
         )
     }
 
@@ -62,7 +67,7 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
         1 to AnswerResult(success = false, feedback = WRONG_ANSWER),
     ).map { (answerIdx, expected) ->
         dynamicTest("answer $answerIdx is ${expected.success}") {
-            val actual = sut.solveInitialQuiz(answer = answerIdx)
+            val actual = sut.solveInitialQuiz(answer = answerIdx, userDetails = userDetails)
 
             assertEquals(expected, actual)
         }
@@ -70,20 +75,21 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
 
     @Test
     fun `Adds a quiz`() {
-        val actual = sut.addQuiz(newQuiz = newQuiz1)
+        val actual = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails)
 
         assertAll(
             { assertEquals(quiz1Id, actual.id) },
             { assertEquals(newQuiz1.title, actual.title) },
             { assertEquals(newQuiz1.text, actual.text) },
             { assertEquals(newQuiz1.options, actual.options) },
-            { assertEquals(newQuiz1.answer, actual.answer) }
+            { assertEquals(newQuiz1.answer, actual.answer) },
+            { assertEquals(user.username, actual.authorUsername) }
         )
     }
 
     @Test
     fun `Gets quiz by ID`() {
-        sut.addQuiz(newQuiz1)
+        sut.addQuiz(newQuiz1, userDetails)
 
         val actual = sut.getQuizBy(id = quiz1Id)
 
@@ -92,7 +98,8 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
             { assertEquals(newQuiz1.title, actual.title) },
             { assertEquals(newQuiz1.text, actual.text) },
             { assertEquals(newQuiz1.options, actual.options) },
-            { assertEquals(newQuiz1.answer, actual.answer) }
+            { assertEquals(newQuiz1.answer, actual.answer) },
+            { assertEquals(user.username, actual.authorUsername) }
         )
     }
 
@@ -105,10 +112,10 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
 
     @Test
     fun `Gets two quizzes`() {
-        sut.addQuiz(newQuiz = newQuiz1)
+        sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails)
         val newQuiz2 = newQuiz1.copy(title = "The Java Logo 2")
         val quiz2Id = QuizId(2)
-        sut.addQuiz(newQuiz = newQuiz2)
+        sut.addQuiz(newQuiz = newQuiz2, userDetails = userDetails)
 
         val actual = sut.getAllQuizzes()
 
@@ -119,11 +126,13 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
             { assertEquals(newQuiz1.text, actual[0].text) },
             { assertEquals(newQuiz1.options, actual[0].options) },
             { assertEquals(newQuiz1.answer, actual[0].answer) },
+            { assertEquals(user.username, actual[0].authorUsername) },
             { assertEquals(quiz2Id, actual[1].id) },
             { assertEquals(newQuiz2.title, actual[1].title) },
             { assertEquals(newQuiz2.text, actual[1].text) },
             { assertEquals(newQuiz2.options, actual[1].options) },
-            { assertEquals(newQuiz2.answer, actual[1].answer) }
+            { assertEquals(newQuiz2.answer, actual[1].answer) },
+            { assertEquals(user.username, actual[1].authorUsername) },
         )
     }
 
@@ -141,7 +150,7 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
         )
     ).map { (displayName, answer, expected) ->
         dynamicTest(displayName) {
-            val addedQuizId = sut.addQuiz(newQuiz = newQuiz1).id
+            val addedQuizId = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails).id
 
             val actual = sut.solveQuizBy(id = addedQuizId, answer = answer)
 
@@ -152,7 +161,7 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
     @Test
     fun `Solves quiz with answers = null and empty provided answer`() {
         val quizWithNullAnswer = newQuiz1.copy(answer = null)
-        val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer).id
+        val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer, userDetails = userDetails).id
 
         val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf()))
 
