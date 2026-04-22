@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -77,6 +78,13 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         val body = makeErrorBodyFor(exception)
 
         return ResponseEntity<ErrorBody>(body, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDenied(exception: AccessDeniedException): ResponseEntity<ErrorBody> {
+        val body = makeErrorBodyFor(exception)
+
+        return ResponseEntity<ErrorBody>(body, HttpStatus.FORBIDDEN)
     }
 
     private fun makeErrorBodyFor(ex: Exception): ErrorBody =

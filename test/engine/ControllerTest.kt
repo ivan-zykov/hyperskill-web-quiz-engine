@@ -17,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -31,6 +32,8 @@ private const val CONGRATULATIONS = "Congratulations, you're right!"
 
 private const val USERNAME = "test@user.com"
 private const val PASSWORD = "testPass"
+private const val OTHER_USERNAME = "other@user.com"
+private const val OTHER_PASSWORD = "otherPass"
 
 private val quiz = QuizInDto(
     title = TITLE,
@@ -290,6 +293,40 @@ abstract class ControllerTest(
             jsonPath("$.error") { value(containsString("Error")) }
             jsonPath("$.error") { value(containsString(idOfNonExistingQuiz.toString())) }
         }
+    }
+
+    @Test
+    fun `Deleting quiz by ID returns No content for same user as author`() {
+        val addedQuiz = addQuiz(quizSerialized1)
+
+        mockMvc.delete("$API_PATH/quizzes/{id}", addedQuiz.id.value) {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
+            .andExpect {
+                status { isNoContent() }
+            }
+    }
+
+    @Test
+    fun `Deleting quiz by ID returns Forbidden for user different than author`() {
+        val addedQuiz = addQuiz(quizSerialized1)
+        userRepo.save(
+            AppUser(
+                username = OTHER_USERNAME,
+                password = passEncoder.encode(OTHER_PASSWORD)
+            )
+        )
+
+        mockMvc.delete("$API_PATH/quizzes/{id}", addedQuiz.id.value) {
+            with(httpBasic(OTHER_USERNAME, OTHER_PASSWORD))
+        }
+            .andExpectAll {
+                status { isForbidden() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.error") {
+                    value("Username $OTHER_USERNAME doesn't math the author's username of quiz with ID ${addedQuiz.id}")
+                }
+            }
     }
 
     @Test
