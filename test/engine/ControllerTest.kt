@@ -14,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -26,6 +28,9 @@ private const val TEXT = "test text"
 private const val OPTION = "test option"
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
+
+private const val USERNAME = "test@user.com"
+private const val PASSWORD = "testPass"
 
 private val quiz = QuizInDto(
     title = TITLE,
@@ -45,18 +50,33 @@ private val userCredentials = UserCredentialsDTO(
 abstract class ControllerTest(
     private val mockMvc: MockMvc,
     private val quizzesRepository: QuizzesRepository,
-    private val mapper: ObjectMapper
+    private val mapper: ObjectMapper,
+    private val userRepo: AppUserRepository,
+    private val passEncoder: PasswordEncoder,
 ) {
     private val quizSerialized1: String = mapper.writeValueAsString(quiz)
 
     @BeforeEach
     fun reset() {
         quizzesRepository.reset()
+
+        userRepo.deleteAll()
+        val userId = 0
+        if (!userRepo.existsById(userId)) {
+            val user = AppUser(
+                id = userId,
+                username = USERNAME,
+                password = passEncoder.encode(PASSWORD)
+            )
+            userRepo.save(user)
+        }
     }
 
     @Test
     fun `Getting initial quiz returns OK with one quiz`() {
-        mockMvc.get("$API_PATH/quiz")
+        mockMvc.get("$API_PATH/quiz") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -72,7 +92,9 @@ abstract class ControllerTest(
 
     @Test
     fun `Solving initial quiz returns OK for correct answer`() {
-        mockMvc.post("$API_PATH/quiz?answer=2")
+        mockMvc.post("$API_PATH/quiz?answer=2") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -87,7 +109,9 @@ abstract class ControllerTest(
         "a=2",
     ).map { requestParam ->
         dynamicTest("request param: $requestParam") {
-            mockMvc.post("$API_PATH/quiz?$requestParam")
+            mockMvc.post("$API_PATH/quiz?$requestParam") {
+                with(httpBasic(USERNAME, PASSWORD))
+            }
                 .andExpectAll {
                     status { isBadRequest() }
                     content { contentType(MediaType.APPLICATION_JSON) }
@@ -102,6 +126,7 @@ abstract class ControllerTest(
         mockMvc.post("$API_PATH/quizzes") {
             contentType = MediaType.APPLICATION_JSON
             content = quizSerialized1
+            with(httpBasic(USERNAME, PASSWORD))
         }
             .andExpectAll {
                 status { isOk() }
@@ -153,6 +178,7 @@ abstract class ControllerTest(
             mockMvc.post("$API_PATH/quizzes") {
                 contentType = MediaType.APPLICATION_JSON
                 content = body
+                with(httpBasic(USERNAME, PASSWORD))
             }
                 .andExpectAll {
                     status { isBadRequest() }
@@ -165,7 +191,9 @@ abstract class ControllerTest(
     fun `Getting quiz by id returns OK with one quiz`() {
         val addedQuizId = addQuiz(quizSerialized1).id.value
 
-        mockMvc.get("$API_PATH/quizzes/${addedQuizId}")
+        mockMvc.get("$API_PATH/quizzes/${addedQuizId}") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -181,7 +209,9 @@ abstract class ControllerTest(
     fun `Getting quiz by id returns Not found for non-existing id`() {
         val quizId = 0
 
-        mockMvc.get("$API_PATH/quizzes/$quizId")
+        mockMvc.get("$API_PATH/quizzes/$quizId") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isNotFound() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -192,7 +222,9 @@ abstract class ControllerTest(
 
     @Test
     fun `Getting all quizzes returns empty array`() {
-        mockMvc.get("$API_PATH/quizzes")
+        mockMvc.get("$API_PATH/quizzes") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -207,7 +239,9 @@ abstract class ControllerTest(
         val quizSerialized2 = mapper.writeValueAsString(quiz.copy(title = "$TITLE 2"))
         addQuiz(quizSerialized2)
 
-        val result = mockMvc.get("$API_PATH/quizzes")
+        val result = mockMvc.get("$API_PATH/quizzes") {
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
@@ -231,6 +265,7 @@ abstract class ControllerTest(
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfAddedQuiz) {
             contentType = MediaType.APPLICATION_JSON
             content = answer
+            with(httpBasic(USERNAME, PASSWORD))
         }
             .andExpectAll {
                 status { isOk() }
@@ -248,6 +283,7 @@ abstract class ControllerTest(
         mockMvc.post("$API_PATH/quizzes/{id}/solve", idOfNonExistingQuiz) {
             contentType = MediaType.APPLICATION_JSON
             content = answer
+            with(httpBasic(USERNAME, PASSWORD))
         }.andExpectAll {
             status { isNotFound() }
             content { contentType(MediaType.APPLICATION_JSON) }
@@ -290,6 +326,7 @@ abstract class ControllerTest(
             post("$API_PATH/quizzes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(quizSerialized)
+                .with(httpBasic(USERNAME, PASSWORD))
         )
             .andReturn()
 
