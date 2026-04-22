@@ -25,10 +25,13 @@ class JpaQuizzesRepositoryAdapter @Autowired constructor(
         jpa.findAll()
             .map { it.toDomain() }
 
-    override fun reset() = jpa.deleteAll()
+    override fun reset() {
+        jpa.deleteAll()
+    }
 
     override fun deleteById(id: QuizId) {
-        TODO("Not yet implemented")
+        findQuizBy(id)
+        jpa.deleteById(id.value.toLong())
     }
 }
 
