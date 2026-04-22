@@ -29,6 +29,10 @@ class InMemoryQuizzesRepository : QuizzesRepository {
         quizzes.clear()
     }
 
+    override fun deleteById(id: QuizId) {
+        TODO("Not yet implemented")
+    }
+
     private fun save(
         newId: QuizId,
         newQuiz: NewQuiz

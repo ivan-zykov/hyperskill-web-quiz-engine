@@ -3,6 +3,7 @@ package engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -75,7 +76,15 @@ class QuizServiceImpl @Autowired constructor(
         id: QuizId,
         userDetails: UserDetails
     ) {
-        TODO("Not yet implemented")
+        val quiz = quizzesRepo.findQuizBy(id)
+
+        if (userDetails.username.equals(quiz.authorUsername).not()) {
+            throw AccessDeniedException(
+                "Username ${userDetails.username} doesn't math the author's username of quiz with ID $id"
+            )
+        }
+
+        quizzesRepo.deleteById(id)
     }
 
     @OptIn(ExperimentalTime::class)

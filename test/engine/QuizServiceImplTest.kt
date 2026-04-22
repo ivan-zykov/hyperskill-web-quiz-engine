@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
@@ -184,5 +185,24 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
             sut.registerNewUser(userCredentials)
         }
         assertEquals("User with email ${userCredentials.email} already exists", exception.message)
+    }
+
+    @Test
+    fun `Deleting quiz of different author throws`() {
+        sut.addQuiz(newQuiz1, userDetails)
+        val quiz = sut.getAllQuizzes().first()
+        val otherUser = AppUser(
+            username = "other@user.com",
+            password = "testPass"
+        )
+        val otherUserDetails = AppUserAdapter(otherUser)
+
+        val exception = assertThrows<AccessDeniedException> {
+            sut.deleteQuizBy(quiz.id, otherUserDetails)
+        }
+        assertEquals(
+            "Username ${otherUser.username} doesn't math the author's username of quiz with ID ${quiz.id}",
+            exception.message
+        )
     }
 }

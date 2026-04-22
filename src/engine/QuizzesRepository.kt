@@ -5,4 +5,5 @@ interface QuizzesRepository {
     fun findQuizBy(id: QuizId): Quiz
     fun getAllQuizzes(): List<Quiz>
     fun reset()
+    fun deleteById(id: QuizId)
 }
