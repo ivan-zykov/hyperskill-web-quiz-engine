@@ -10,4 +10,5 @@ interface QuizService {
     fun getAllQuizzes(): List<Quiz>
     fun solveQuizBy(id: QuizId, answer: Answer): AnswerResult
     fun registerNewUser(credentials: UserCredentials)
+    fun deleteQuizBy(id: QuizId, userDetails: UserDetails)
 }

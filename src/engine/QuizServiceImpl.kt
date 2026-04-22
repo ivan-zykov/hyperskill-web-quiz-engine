@@ -71,6 +71,13 @@ class QuizServiceImpl @Autowired constructor(
         userRepository.save(newUser)
     }
 
+    override fun deleteQuizBy(
+        id: QuizId,
+        userDetails: UserDetails
+    ) {
+        TODO("Not yet implemented")
+    }
+
     @OptIn(ExperimentalTime::class)
     private fun <T> logExecutionTimeWithMessage(
         actionDescription: String,

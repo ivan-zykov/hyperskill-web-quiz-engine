@@ -53,6 +53,18 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
             .body(quiz.toDto())
     }
 
+    @DeleteMapping("/quizzes/{id}")
+    fun deleteQuizById(
+        @PathVariable id: QuizId,
+        @AuthenticationPrincipal userDetails: UserDetails,
+    ): ResponseEntity<Void> {
+        quizService.deleteQuizBy(id, userDetails)
+
+        return ResponseEntity
+            .noContent()
+            .build()
+    }
+
     @GetMapping("/quizzes")
     fun getAllQuizzes(): ResponseEntity<List<QuizOutDto>> {
         val quizzes = quizService.getAllQuizzes()
