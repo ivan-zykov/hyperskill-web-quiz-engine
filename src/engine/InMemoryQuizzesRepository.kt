@@ -30,7 +30,9 @@ class InMemoryQuizzesRepository : QuizzesRepository {
     }
 
     override fun deleteById(id: QuizId) {
-        TODO("Not yet implemented")
+        val quiz = findQuizBy(id)
+
+        quizzes.remove(quiz.id)
     }
 
     private fun save(

@@ -106,4 +106,38 @@ class InMemoryQuizzesRepositoryTest {
 
         assertTrue { sut.getAllQuizzes().isEmpty() }
     }
+
+    @Test
+    fun `Deletes quiz by ID`() {
+        sut.addQuiz(newQuiz1)
+
+        sut.deleteById(quiz1Id)
+
+        assertTrue { sut.getAllQuizzes().isEmpty() }
+    }
+
+    @Test
+    fun `Deleting quiz by ID does not delete other quizzes`() {
+        sut.addQuiz(newQuiz = newQuiz1)
+        val newQuiz2 = newQuiz1.copy(title = "The Java Logo 2")
+        val quiz2Id = QuizId(2)
+        sut.addQuiz(newQuiz = newQuiz2)
+
+        sut.deleteById(quiz1Id)
+
+        val actual = sut.getAllQuizzes()
+        assertAll(
+            { assertEquals(1, actual.size) },
+            { assertEquals(quiz2Id, actual[0].id) },
+        )
+    }
+
+    @Test
+    fun `Deleting non-existent quiz throws`() {
+        val nonExistentId = QuizId(0)
+
+        assertThrows<QuizNotFoundException> {
+            sut.deleteById(id = nonExistentId)
+        }
+    }
 }
