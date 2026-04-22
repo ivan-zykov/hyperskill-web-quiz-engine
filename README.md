@@ -1,7 +1,7 @@
 # Web Quiz Engine (Spring Boot, Kotlin)
 
 This project demonstrates a RESTful backend built with Kotlin and Spring Boot, focusing on maintainable architecture and testability.
-Provides REST endpoints for registering users, creating quizzes, retrieving them, and validating user answers. 
+Provides REST endpoints for registering users, creating, retrieving, deleting quizzes, and validating user answers.
 
 ## Tech stack
 
@@ -57,6 +57,7 @@ http://localhost:8889
 - GET /api/quizzes/{id} — retrieve a quiz
 - GET /api/quizzes — retrieve all quiz
 - POST /api/quizzes/{id}/solve — submit an answer
+- DELETE /api/quizzes/{id} - delete a quiz
 
 ## Future improvements
 
