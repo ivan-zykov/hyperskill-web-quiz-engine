@@ -2,6 +2,7 @@ package engine
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -185,6 +186,16 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
             sut.registerNewUser(userCredentials)
         }
         assertEquals("User with email ${userCredentials.email} already exists", exception.message)
+    }
+
+    @Test
+    fun `Deletes quiz of the same author`() {
+        sut.addQuiz(newQuiz1, userDetails)
+        val quiz = sut.getAllQuizzes().first()
+
+        sut.deleteQuizBy(quiz.id, userDetails)
+
+        assertTrue { sut.getAllQuizzes().isEmpty() }
     }
 
     @Test
