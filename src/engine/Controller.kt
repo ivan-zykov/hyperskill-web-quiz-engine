@@ -109,7 +109,6 @@ private fun QuizInDto.toNewQuiz() = NewQuiz(
     text = text,
     options = options,
     answer = answer,
-    authorUsername = null,
 )
 
 private fun Quiz.toDto() = QuizOutDto(

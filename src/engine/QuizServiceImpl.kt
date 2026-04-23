@@ -106,7 +106,6 @@ class QuizServiceImpl @Autowired constructor(
             text = "What is depicted on the Java logo?",
             options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
             answer = listOf(2),
-            authorUsername = null,
         ),
         userDetails
     )

@@ -7,40 +7,45 @@ import org.springframework.stereotype.Repository
 @Repository
 @Profile("jpa")
 class JpaQuizzesRepositoryAdapter @Autowired constructor(
-    private val jpa: JpaQuizzesRepository
+    private val jpaQuizRepo: JpaQuizzesRepository,
+    private val userRepo: AppUserRepository,
 ) : QuizzesRepository {
     override fun addQuiz(newQuiz: NewQuiz): Quiz {
-        val entity = newQuiz.toEntity()
-        val savedEntity = jpa.save(entity)
+        val user = userRepo.findByUsername(newQuiz.authorUsername!!)
+            ?: throw RuntimeException("Server error. User ${newQuiz.authorUsername} was not found.")
+        val entity = newQuiz.toEntity(user)
+
+        val savedEntity = jpaQuizRepo.save(entity)
 
         return savedEntity.toDomain()
     }
 
     override fun findQuizBy(id: QuizId): Quiz =
-        jpa.findById(id.value.toLong())
+        jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Failed to fetch quiz with ID: {$id.value}") }
             .toDomain()
 
     override fun getAllQuizzes(): List<Quiz> =
-        jpa.findAll()
+        jpaQuizRepo.findAll()
             .map { it.toDomain() }
 
     override fun reset() {
-        jpa.deleteAll()
+        jpaQuizRepo.deleteAll()
     }
 
     override fun deleteById(id: QuizId) {
         findQuizBy(id)
-        jpa.deleteById(id.value.toLong())
+        jpaQuizRepo.deleteById(id.value.toLong())
     }
 }
 
-private fun NewQuiz.toEntity(): QuizEntity {
+private fun NewQuiz.toEntity(user: AppUser): QuizEntity {
     val entity = QuizEntity()
     entity.title = this.title
     entity.text = this.text
     entity.options = this.options
     entity.answers = this.answer
+    entity.author = user
 
     return entity
 }

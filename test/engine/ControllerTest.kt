@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 
 private const val API_PATH = "/api"
 
@@ -359,12 +358,11 @@ abstract class ControllerTest(
     }
 
     private fun addQuiz(quizSerialized: String): QuizOutDto {
-        val result = mockMvc.perform(
-            post("$API_PATH/quizzes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(quizSerialized)
-                .with(httpBasic(USERNAME, PASSWORD))
-        )
+        val result = mockMvc.post("$API_PATH/quizzes") {
+            contentType = MediaType.APPLICATION_JSON
+            content = quizSerialized
+            with(httpBasic(USERNAME, PASSWORD))
+        }
             .andReturn()
 
         val createdQuiz: QuizOutDto? = mapper.readValue(result.response.contentAsByteArray)
