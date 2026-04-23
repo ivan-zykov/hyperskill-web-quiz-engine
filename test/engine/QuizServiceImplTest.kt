@@ -212,7 +212,7 @@ class QuizServiceImplTest @Autowired constructor(private val userRepo: AppUserRe
             sut.deleteQuizBy(quiz.id, otherUserDetails)
         }
         assertEquals(
-            "Username ${otherUser.username} doesn't math the author's username of quiz with ID ${quiz.id}",
+            "Error. Username ${otherUser.username} doesn't math the author's username of quiz with ID ${quiz.id.value}.",
             exception.message
         )
     }

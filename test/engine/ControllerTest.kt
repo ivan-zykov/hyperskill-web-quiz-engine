@@ -323,7 +323,7 @@ abstract class ControllerTest(
                 status { isForbidden() }
                 content { contentType(MediaType.APPLICATION_JSON) }
                 jsonPath("$.error") {
-                    value("Username $OTHER_USERNAME doesn't math the author's username of quiz with ID ${addedQuiz.id}")
+                    value("Error. Username $OTHER_USERNAME doesn't math the author's username of quiz with ID ${addedQuiz.id.value}.")
                 }
             }
     }
