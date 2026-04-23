@@ -1,5 +1,6 @@
 package engine
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -24,6 +25,25 @@ class SecurityConfig {
             }
             httpBasic { }
             csrf { disable() }
+        }
+
+        return http.build()
+    }
+
+    @Bean
+    @Order(2)
+    fun h2ConsoleFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http {
+            securityMatcher(PathRequest.toH2Console())
+            authorizeHttpRequests {
+                authorize(anyRequest, permitAll)
+            }
+            csrf { disable() }
+            headers {
+                frameOptions {
+                    sameOrigin = true
+                }
+            }
         }
 
         return http.build()
