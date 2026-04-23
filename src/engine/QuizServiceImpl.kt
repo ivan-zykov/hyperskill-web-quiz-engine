@@ -80,7 +80,7 @@ class QuizServiceImpl @Autowired constructor(
 
         if (userDetails.username.equals(quiz.authorUsername).not()) {
             throw AccessDeniedException(
-                "Username ${userDetails.username} doesn't math the author's username of quiz with ID $id"
+                "Error. Username ${userDetails.username} doesn't math the author's username of quiz with ID ${id.value}."
             )
         }
 
