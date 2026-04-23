@@ -22,7 +22,7 @@ class JpaQuizzesRepositoryAdapter @Autowired constructor(
 
     override fun findQuizBy(id: QuizId): Quiz =
         jpaQuizRepo.findById(id.value.toLong())
-            .orElseThrow { QuizNotFoundException("Error. Failed to fetch quiz with ID: {$id.value}") }
+            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
             .toDomain()
 
     override fun getAllQuizzes(): List<Quiz> =
