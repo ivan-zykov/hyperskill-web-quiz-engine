@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 
@@ -20,13 +19,13 @@ private const val USERNAME = "test@user.com"
 private const val PASSWORD = "testPass"
 
 @DataJpaTest
-@Import(JpaQuizzesRepositoryAdapter::class)
+@Import(JpaQuizzesRepositoryAdapter::class, PasswordEncoderConfig::class)
 @ActiveProfiles("jpa", "test")
 class QuizServiceImplTest @Autowired constructor(
     private val userRepo: AppUserRepository,
     quizRepo: QuizzesRepository,
+    passEncoder: PasswordEncoder,
 ) {
-    private val passEncoder: PasswordEncoder = BCryptPasswordEncoder(7)
     private val sut = QuizServiceImpl(
         quizRepo,
         userRepo,
