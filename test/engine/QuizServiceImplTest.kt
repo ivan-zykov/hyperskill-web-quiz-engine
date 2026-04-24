@@ -20,10 +20,10 @@ private const val PASSWORD = "testPass"
 
 @DataJpaTest
 @Import(JpaQuizzesRepositoryAdapter::class, PasswordEncoderConfig::class)
-@ActiveProfiles("jpa", "test")
+@ActiveProfiles("test")
 class QuizServiceImplTest @Autowired constructor(
     private val userRepo: AppUserRepository,
-    quizRepo: QuizzesRepository,
+    quizRepo: JpaQuizzesRepositoryAdapter,
     passEncoder: PasswordEncoder,
 ) {
     private val sut = QuizServiceImpl(

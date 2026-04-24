@@ -51,7 +51,7 @@ private val userCredentials = UserCredentialsDTO(
 @Import(SecurityConfig::class)
 abstract class ControllerTest(
     private val mockMvc: MockMvc,
-    private val quizzesRepository: QuizzesRepository,
+    private val quizzesRepository: JpaQuizzesRepositoryAdapter,
     private val mapper: ObjectMapper,
     private val userRepo: AppUserRepository,
     private val passEncoder: PasswordEncoder,

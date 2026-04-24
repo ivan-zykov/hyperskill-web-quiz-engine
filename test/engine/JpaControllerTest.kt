@@ -6,10 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 
-@ActiveProfiles("jpa", "test")
+@ActiveProfiles("test")
 class JpaControllerTest @Autowired constructor(
     mockMvc: MockMvc,
-    quizzesRepository: QuizzesRepository,
+    quizzesRepository: JpaQuizzesRepositoryAdapter,
     mapper: ObjectMapper,
     userRepo: AppUserRepository,
     passEncoder: PasswordEncoder
