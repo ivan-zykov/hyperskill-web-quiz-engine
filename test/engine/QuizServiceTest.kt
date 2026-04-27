@@ -19,16 +19,16 @@ private const val USERNAME = "test@user.com"
 private const val PASSWORD = "testPass"
 
 @DataJpaTest
-@Import(JpaQuizzesRepositoryAdapter::class, PasswordEncoderConfig::class)
+@Import(PasswordEncoderConfig::class)
 @ActiveProfiles("test")
 class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
-    quizRepo: JpaQuizzesRepositoryAdapter,
+    quizRepo: JpaQuizzesRepository,
     passEncoder: PasswordEncoder,
 ) {
     private val sut = QuizService(
-        quizRepo,
         userRepo,
+        quizRepo,
         passEncoder
     )
 

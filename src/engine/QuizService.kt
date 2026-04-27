@@ -15,8 +15,8 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 @Service
 class QuizService @Autowired constructor(
-    private val quizzesRepo: JpaQuizzesRepositoryAdapter,
     private val userRepo: AppUserRepository,
+    private val quizRepo: JpaQuizzesRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -42,13 +42,17 @@ class QuizService @Autowired constructor(
 
         val entity = newQuiz.toEntity(user)
 
-        return quizzesRepo.addQuiz(entity).toDomain()
+        return quizRepo.save(entity).toDomain()
     }
 
     fun getQuizBy(id: QuizId): Quiz =
-        logExecutionTimeWithMessage("Getting a quiz with ID ${id.value} took") { quizzesRepo.findQuizBy(id) }
+        logExecutionTimeWithMessage("Getting a quiz with ID ${id.value} took") {
+            quizRepo.findById(id.value.toLong())
+                .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+                .toDomain()
+        }
 
-    fun getAllQuizzes(): List<Quiz> = quizzesRepo.getAllQuizzes()
+    fun getAllQuizzes(): List<Quiz> = quizRepo.findAll().map { it.toDomain() }
 
     fun solveQuizBy(
         id: QuizId,
@@ -80,7 +84,9 @@ class QuizService @Autowired constructor(
         id: QuizId,
         userDetails: UserDetails
     ) {
-        val quiz = quizzesRepo.findQuizBy(id)
+        val quiz = quizRepo.findById(id.value.toLong())
+            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .toDomain()
 
         if (userDetails.username.equals(quiz.authorUsername).not()) {
             throw AccessDeniedException(
@@ -88,7 +94,7 @@ class QuizService @Autowired constructor(
             )
         }
 
-        quizzesRepo.deleteById(id)
+        quizRepo.deleteById(id.value.toLong())
     }
 
     @OptIn(ExperimentalTime::class)

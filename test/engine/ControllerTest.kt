@@ -54,7 +54,7 @@ private val userCredentials = UserCredentialsDTO(
 @ActiveProfiles("test")
 class ControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
-    private val quizzesRepository: JpaQuizzesRepositoryAdapter,
+    private val quizzesRepository: JpaQuizzesRepository,
     private val mapper: ObjectMapper,
     private val userRepo: AppUserRepository,
     private val passEncoder: PasswordEncoder,
@@ -63,7 +63,7 @@ class ControllerTest @Autowired constructor(
 
     @BeforeEach
     fun reset() {
-        quizzesRepository.reset()
+        quizzesRepository.deleteAll()
 
         userRepo.deleteAll()
         val userId = 0
