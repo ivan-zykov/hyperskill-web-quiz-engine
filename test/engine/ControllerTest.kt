@@ -10,12 +10,14 @@ import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.fail
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
@@ -49,7 +51,8 @@ private val userCredentials = UserCredentialsDTO(
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityConfig::class)
-abstract class ControllerTest(
+@ActiveProfiles("test")
+class ControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val quizzesRepository: JpaQuizzesRepositoryAdapter,
     private val mapper: ObjectMapper,
