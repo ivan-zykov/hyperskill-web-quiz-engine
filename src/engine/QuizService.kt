@@ -16,7 +16,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 @Service
 class QuizService @Autowired constructor(
     private val quizzesRepo: JpaQuizzesRepositoryAdapter,
-    private val userRepository: AppUserRepository,
+    private val userRepo: AppUserRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -37,8 +37,12 @@ class QuizService @Autowired constructor(
     }
 
     fun addQuiz(newQuiz: NewQuiz, userDetails: UserDetails): Quiz {
-        newQuiz.authorUsername = userDetails.username
-        return quizzesRepo.addQuiz(newQuiz)
+        val user = userRepo.findByUsername(userDetails.username)
+            ?: throw RuntimeException("Server error. User ${userDetails.username} was not found.")
+
+        val entity = newQuiz.toEntity(user)
+
+        return quizzesRepo.addQuiz(entity).toDomain()
     }
 
     fun getQuizBy(id: QuizId): Quiz =
@@ -61,7 +65,7 @@ class QuizService @Autowired constructor(
     }
 
     fun registerNewUser(credentials: UserCredentials) {
-        val existingUser = userRepository.findByUsername(credentials.email)
+        val existingUser = userRepo.findByUsername(credentials.email)
         if (existingUser != null) {
             throw DuplicatedUserException("User with email ${credentials.email} already exists")
         }
@@ -69,7 +73,7 @@ class QuizService @Autowired constructor(
             username = credentials.email,
             password = passwordEncoder.encode(credentials.password)
         )
-        userRepository.save(newUser)
+        userRepo.save(newUser)
     }
 
     fun deleteQuizBy(
@@ -119,3 +123,23 @@ private fun Quiz.check(answer: Answer) =
     } else {
         false to WRONG_ANSWER
     }
+
+private fun NewQuiz.toEntity(user: AppUser): QuizEntity {
+    val entity = QuizEntity()
+    entity.title = this.title
+    entity.text = this.text
+    entity.options = this.options
+    entity.answers = this.answer
+    entity.author = user
+
+    return entity
+}
+
+private fun QuizEntity.toDomain() = Quiz(
+    title = this.title ?: "",
+    text = this.text ?: "",
+    options = this.options ?: emptyList(),
+    answer = this.answers,
+    id = QuizId(this.id?.toInt() ?: -1),
+    authorUsername = this.author?.username ?: "",
+)

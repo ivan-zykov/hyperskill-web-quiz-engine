@@ -4,18 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-class JpaQuizzesRepositoryAdapter @Autowired constructor(
-    private val jpaQuizRepo: JpaQuizzesRepository,
-    private val userRepo: AppUserRepository,
-) {
-    fun addQuiz(newQuiz: NewQuiz): Quiz {
-        val user = userRepo.findByUsername(newQuiz.authorUsername!!)
-            ?: throw RuntimeException("Server error. User ${newQuiz.authorUsername} was not found.")
-        val entity = newQuiz.toEntity(user)
+class JpaQuizzesRepositoryAdapter(@Autowired private val jpaQuizRepo: JpaQuizzesRepository) {
 
-        val savedEntity = jpaQuizRepo.save(entity)
-
-        return savedEntity.toDomain()
+    fun addQuiz(entity: QuizEntity): QuizEntity {
+        return jpaQuizRepo.save(entity)
     }
 
     fun findQuizBy(id: QuizId): Quiz =
@@ -35,17 +27,6 @@ class JpaQuizzesRepositoryAdapter @Autowired constructor(
         findQuizBy(id)
         jpaQuizRepo.deleteById(id.value.toLong())
     }
-}
-
-private fun NewQuiz.toEntity(user: AppUser): QuizEntity {
-    val entity = QuizEntity()
-    entity.title = this.title
-    entity.text = this.text
-    entity.options = this.options
-    entity.answers = this.answer
-    entity.author = user
-
-    return entity
 }
 
 private fun QuizEntity.toDomain(): Quiz {

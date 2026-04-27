@@ -37,6 +37,10 @@ class QuizServiceTest @Autowired constructor(
         username = USERNAME,
         password = PASSWORD
     )
+    val otherUser = AppUser(
+        username = "other@user.com",
+        password = PASSWORD
+    )
     private val encodedUser = AppUser(
         username = USERNAME,
         password = passEncoder.encode(PASSWORD)
@@ -53,7 +57,6 @@ class QuizServiceTest @Autowired constructor(
         text = "What is depicted on the Java logo?",
         options = listOf("Robot", "Tea leaf", "Cup of coffee", "Bug"),
         answer = listOf(2),
-        authorUsername = null,
     )
     private val userCredentials = UserCredentials(
         email = "vanya@mail.com",
@@ -95,6 +98,19 @@ class QuizServiceTest @Autowired constructor(
             { assertEquals(newQuiz1.options, actualQuiz.options) },
             { assertEquals(newQuiz1.answer, actualQuiz.answer) },
             { assertEquals(user.username, actualQuiz.authorUsername) }
+        )
+    }
+
+    @Test
+    fun `Adding quiz throws when user not found`() {
+        val otherUserDetails = AppUserAdapter(otherUser)
+
+        val exception = assertThrows<RuntimeException> {
+            sut.addQuiz(newQuiz = newQuiz1, userDetails = otherUserDetails)
+        }
+        assertEquals(
+            "Server error. User ${otherUserDetails.username} was not found.",
+            exception.message
         )
     }
 
@@ -210,10 +226,6 @@ class QuizServiceTest @Autowired constructor(
     fun `Deleting quiz of different author throws`() {
         sut.addQuiz(newQuiz1, userDetails)
         val quiz = sut.getAllQuizzes().first()
-        val otherUser = AppUser(
-            username = "other@user.com",
-            password = PASSWORD
-        )
         val otherUserDetails = AppUserAdapter(otherUser)
 
         val exception = assertThrows<AccessDeniedException> {
