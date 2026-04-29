@@ -23,7 +23,7 @@ private const val PASSWORD = "testPass"
 @ActiveProfiles("test")
 class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
-    quizRepo: JpaQuizzesRepository,
+    quizRepo: CrudQuizzesRepository,
     passEncoder: PasswordEncoder,
 ) {
     private val sut = QuizService(

@@ -1,5 +1,5 @@
 package engine
 
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.jpa.repository.JpaRepository
 
-interface JpaQuizzesRepository : CrudRepository<QuizEntity, Long>
+interface JpaQuizzesRepository : JpaRepository<QuizEntity, Long>

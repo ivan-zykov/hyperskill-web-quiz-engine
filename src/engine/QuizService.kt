@@ -16,7 +16,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 @Service
 class QuizService @Autowired constructor(
     private val userRepo: AppUserRepository,
-    private val quizRepo: JpaQuizzesRepository,
+    private val quizRepo: CrudQuizzesRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
