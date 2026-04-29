@@ -23,12 +23,14 @@ private const val PASSWORD = "testPass"
 @ActiveProfiles("test")
 class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
-    quizRepo: CrudQuizzesRepository,
+    crudQuizRepo: CrudQuizzesRepository,
+    jpaQuizRepo: JpaQuizzesRepository,
     passEncoder: PasswordEncoder,
 ) {
     private val sut = QuizService(
         userRepo,
-        quizRepo,
+        crudQuizRepo,
+        jpaQuizRepo,
         passEncoder
     )
 
@@ -131,34 +133,35 @@ class QuizServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `Gets zero quizzes`() {
-        val actual = sut.getAllQuizzes()
+    fun `Gets page with zero quizzes`() {
+        val quizzesPaginated = sut.getAllQuizzesPaginated(0)
 
-        assertEquals(listOf<Quiz>(), actual)
+        assertTrue(quizzesPaginated.isEmpty)
     }
 
     @Test
-    fun `Gets two quizzes`() {
+    fun `Gets page with two quizzes`() {
         val savedQuiz1 = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails)
         val newQuiz2 = newQuiz1.copy(title = "The Java Logo 2")
         val savedQuiz2 = sut.addQuiz(newQuiz = newQuiz2, userDetails = userDetails)
 
-        val fetchedQuizzes = sut.getAllQuizzes()
+        val fetchedQuizzes = sut.getAllQuizzesPaginated(0)
 
         assertAll(
-            { assertEquals(2, fetchedQuizzes.size) },
-            { assertEquals(savedQuiz1.id, fetchedQuizzes[0].id) },
-            { assertEquals(savedQuiz1.title, fetchedQuizzes[0].title) },
-            { assertEquals(savedQuiz1.text, fetchedQuizzes[0].text) },
-            { assertEquals(savedQuiz1.options, fetchedQuizzes[0].options) },
-            { assertEquals(savedQuiz1.answer, fetchedQuizzes[0].answer) },
-            { assertEquals(user.username, fetchedQuizzes[0].authorUsername) },
-            { assertEquals(savedQuiz2.id, fetchedQuizzes[1].id) },
-            { assertEquals(savedQuiz2.title, fetchedQuizzes[1].title) },
-            { assertEquals(savedQuiz2.text, fetchedQuizzes[1].text) },
-            { assertEquals(savedQuiz2.options, fetchedQuizzes[1].options) },
-            { assertEquals(savedQuiz2.answer, fetchedQuizzes[1].answer) },
-            { assertEquals(user.username, fetchedQuizzes[1].authorUsername) },
+            { assertEquals(1, fetchedQuizzes.totalPages) },
+            { assertEquals(2, fetchedQuizzes.totalElements) },
+            { assertEquals(savedQuiz1.id, fetchedQuizzes.content[0].id) },
+            { assertEquals(savedQuiz1.title, fetchedQuizzes.content[0].title) },
+            { assertEquals(savedQuiz1.text, fetchedQuizzes.content[0].text) },
+            { assertEquals(savedQuiz1.options, fetchedQuizzes.content[0].options) },
+            { assertEquals(savedQuiz1.answer, fetchedQuizzes.content[0].answer) },
+            { assertEquals(user.username, fetchedQuizzes.content[0].authorUsername) },
+            { assertEquals(savedQuiz2.id, fetchedQuizzes.content[1].id) },
+            { assertEquals(savedQuiz2.title, fetchedQuizzes.content[1].title) },
+            { assertEquals(savedQuiz2.text, fetchedQuizzes.content[1].text) },
+            { assertEquals(savedQuiz2.options, fetchedQuizzes.content[1].options) },
+            { assertEquals(savedQuiz2.answer, fetchedQuizzes.content[1].answer) },
+            { assertEquals(user.username, fetchedQuizzes.content[1].authorUsername) },
         )
     }
 
@@ -215,17 +218,17 @@ class QuizServiceTest @Autowired constructor(
     @Test
     fun `Deletes quiz of the same author`() {
         sut.addQuiz(newQuiz1, userDetails)
-        val quiz = sut.getAllQuizzes().first()
+        val quiz = sut.getAllQuizzesPaginated(0).first()
 
         sut.deleteQuizBy(quiz.id, userDetails)
 
-        assertTrue { sut.getAllQuizzes().isEmpty() }
+        assertTrue { sut.getAllQuizzesPaginated(0).isEmpty }
     }
 
     @Test
     fun `Deleting quiz of different author throws`() {
         sut.addQuiz(newQuiz1, userDetails)
-        val quiz = sut.getAllQuizzes().first()
+        val quiz = sut.getAllQuizzesPaginated(0).first()
         val otherUserDetails = AppUserAdapter(otherUser)
 
         val exception = assertThrows<AccessDeniedException> {

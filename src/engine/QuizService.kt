@@ -3,6 +3,9 @@ package engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -17,6 +20,7 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 class QuizService @Autowired constructor(
     private val userRepo: AppUserRepository,
     private val quizRepo: CrudQuizzesRepository,
+    private val jpaQuizRepo: JpaQuizzesRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -52,7 +56,15 @@ class QuizService @Autowired constructor(
                 .toDomain()
         }
 
+    //    todo: remove
     fun getAllQuizzes(): List<Quiz> = quizRepo.findAll().map { it.toDomain() }
+
+    fun getAllQuizzesPaginated(pageNumber: Int): Page<Quiz> {
+        val pageWithMaxTenQuizzes: Pageable = PageRequest.of(pageNumber, 10)
+
+        return jpaQuizRepo.findAll(pageWithMaxTenQuizzes)
+            .map { it?.toDomain() }
+    }
 
     fun solveQuizBy(
         id: QuizId,
