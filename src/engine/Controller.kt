@@ -2,6 +2,7 @@ package engine
 
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -66,8 +67,8 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @GetMapping("/quizzes")
-    fun getAllQuizzes(): ResponseEntity<List<QuizOutDto>> {
-        val quizzes = quizService.getAllQuizzes()
+    fun getAllQuizzes(@RequestParam(defaultValue = "0") pageNumber: Int): ResponseEntity<Page<QuizOutDto>> {
+        val quizzes = quizService.getAllQuizzesPaginated(pageNumber)
 
         return ResponseEntity
             .ok()

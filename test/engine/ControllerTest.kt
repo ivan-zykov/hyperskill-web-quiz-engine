@@ -3,8 +3,6 @@ package engine
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.hamcrest.Matchers.containsString
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
@@ -226,38 +224,43 @@ class ControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `Getting all quizzes returns empty array`() {
+    fun `Getting all quizzes returns page with empty content`() {
         mockMvc.get("$API_PATH/quizzes") {
             with(httpBasic(USERNAME, PASSWORD))
         }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
-                jsonPath("$") { isArray() }
-                jsonPath("$") { isEmpty() }
+                jsonPath("$.totalPages") { value(0) }
+                jsonPath("$.totalElements") { value(0) }
+                jsonPath("$.content") { isArray() }
+                jsonPath("$.content") { isEmpty() }
             }
     }
 
     @Test
-    fun `Getting all quizzes returns list with two`() {
+    fun `Getting all quizzes returns page with two`() {
         addQuiz(quizSerialized1)
         val quizSerialized2 = mapper.writeValueAsString(quiz.copy(title = "$TITLE 2"))
         addQuiz(quizSerialized2)
 
-        val result = mockMvc.get("$API_PATH/quizzes") {
+        mockMvc.get("$API_PATH/quizzes") {
             with(httpBasic(USERNAME, PASSWORD))
         }
             .andExpectAll {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.totalPages") { value(1) }
+                jsonPath("$.totalElements") { value(2) }
+                jsonPath("$.content[0].id") { value(1) }
+                jsonPath("$.content[0].title") { value(quiz.title) }
+                jsonPath("$.content[0].text") { value(TEXT) }
+                jsonPath("$.content[0].options[0]") { value(OPTION) }
+                jsonPath("$.content[1].id") { value(2) }
+                jsonPath("$.content[1].title") { containsString(TITLE) }
+                jsonPath("$.content[1].text") { value(TEXT) }
+                jsonPath("$.content[1].options[0]") { value(OPTION) }
             }
-            .andReturn()
-
-        val returnedQuizzes: List<QuizOutDto> = mapper.readValue(result.response.contentAsString)
-        assertNotEquals(returnedQuizzes[0].id, returnedQuizzes[1].id)
-        assertTrue(returnedQuizzes.all { it.title.isNotEmpty() })
-        assertTrue(returnedQuizzes.all { it.text == TEXT })
-        assertTrue(returnedQuizzes.all { it.options.first() == OPTION })
     }
 
     @Test

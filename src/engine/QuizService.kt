@@ -56,9 +56,6 @@ class QuizService @Autowired constructor(
                 .toDomain()
         }
 
-    //    todo: remove
-    fun getAllQuizzes(): List<Quiz> = quizRepo.findAll().map { it.toDomain() }
-
     fun getAllQuizzesPaginated(pageNumber: Int): Page<Quiz> {
         val pageWithMaxTenQuizzes: Pageable = PageRequest.of(pageNumber, 10)
 
