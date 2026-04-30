@@ -25,12 +25,14 @@ class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
     crudQuizRepo: CrudQuizzesRepository,
     jpaQuizRepo: JpaQuizzesRepository,
+    completionRepo: CompletionsOfQuizRepository,
     passEncoder: PasswordEncoder,
 ) {
     private val sut = QuizService(
         userRepo,
         crudQuizRepo,
         jpaQuizRepo,
+        completionRepo,
         passEncoder
     )
 

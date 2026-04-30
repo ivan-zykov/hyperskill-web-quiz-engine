@@ -1,5 +1,7 @@
 package engine
 
+import java.time.LocalDateTime
+
 data class NewQuiz(
     val title: String,
     val text: String,
@@ -44,3 +46,9 @@ data class UserCredentials(
         return email.hashCode()
     }
 }
+
+class CompletionOfQuiz(
+    val id: Long,
+    val quiz: Quiz,
+    val completedAt: LocalDateTime,
+)

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -21,6 +22,7 @@ class QuizService @Autowired constructor(
     private val userRepo: AppUserRepository,
     private val quizRepo: CrudQuizzesRepository,
     private val jpaQuizRepo: JpaQuizzesRepository,
+    private val completionRepo: CompletionsOfQuizRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -106,6 +108,17 @@ class QuizService @Autowired constructor(
         quizRepo.deleteById(id.value.toLong())
     }
 
+    fun getCompletionsOfQuizBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
+        val pageWithMaxTenSortedByCompletionDesc: Pageable = PageRequest.of(
+            pageNumber,
+            10,
+            Sort.by("completedAt").descending()
+        )
+
+        return completionRepo.findAll(pageWithMaxTenSortedByCompletionDesc)
+            .map { it?.toDomain() }
+    }
+
     @OptIn(ExperimentalTime::class)
     private fun <T> logExecutionTimeWithMessage(
         actionDescription: String,
@@ -157,4 +170,10 @@ private fun QuizEntity.toDomain() = Quiz(
     answer = this.answers,
     id = QuizId(this.id?.toInt() ?: -1),
     authorUsername = this.author?.username ?: "",
+)
+
+private fun CompletionOfQuizEntity.toDomain() = CompletionOfQuiz(
+    id = requireNotNull(this.id) { "Error. CompletionOfQuizEntity.id must not be null" },
+    quiz = requireNotNull(this.quiz) { "Error. CompletionOfQuizEntity.quiz must not be null" }.toDomain(),
+    completedAt = requireNotNull(this.completedAt) { "Error. CompletionOfQuizEntity.completedAt must not be null" },
 )
