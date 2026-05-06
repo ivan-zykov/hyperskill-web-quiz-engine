@@ -21,11 +21,10 @@ The application follows a layered architecture separating web, business logic, a
 - RESTful API design
 - Input validation using Spring validation
 - Centralized exception handling
-- Separation of domain models and DTOs
-- Pluggable persistence layer (in-memory / JPA via Spring profiles)
+- Separation of domain models, DTOs and persistence entities
 - Unit and integration tests (no mocking)
 - Basic HTTP authentication
-- Custom user store
+- New user registration with custom user store
 
 ## Requirements
 
