@@ -1,7 +1,5 @@
 package engine
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -11,8 +9,8 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import java.time.Clock
+import java.time.LocalDateTime
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
@@ -24,10 +22,8 @@ class QuizService @Autowired constructor(
     private val jpaQuizRepo: JpaQuizzesRepository,
     private val completionRepo: CompletionsOfQuizRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val clock: Clock,
 ) {
-
-    private val logger: Logger = LoggerFactory.getLogger(QuizService::class.java)
-
     fun getInitialQuiz(userDetails: UserDetails): Quiz = addInitialQuiz(userDetails)
 
     fun solveInitialQuiz(answer: Int, userDetails: UserDetails): AnswerResult {
@@ -52,11 +48,9 @@ class QuizService @Autowired constructor(
     }
 
     fun getQuizBy(id: QuizId): Quiz =
-        logExecutionTimeWithMessage("Getting a quiz with ID ${id.value} took") {
-            quizRepo.findById(id.value.toLong())
-                .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
-                .toDomain()
-        }
+        quizRepo.findById(id.value.toLong())
+            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .toDomain()
 
     fun getAllQuizzesPaginated(pageNumber: Int): Page<Quiz> {
         val pageWithMaxTenQuizzes: Pageable = PageRequest.of(pageNumber, 10)
@@ -69,9 +63,18 @@ class QuizService @Autowired constructor(
         id: QuizId,
         answer: Answer
     ): AnswerResult {
-        val quiz = getQuizBy(id)
+        val quizEntity = jpaQuizRepo.findById(id.value.toLong())
+            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+        val quiz = quizEntity.toDomain()
 
         val (success, feedback) = quiz.check(answer)
+
+        if (success) {
+            val completionEntity = CompletionOfQuizEntity()
+            completionEntity.quiz = quizEntity
+            completionEntity.completedAt = LocalDateTime.now(clock)
+            completionRepo.save(completionEntity)
+        }
 
         return AnswerResult(
             success = success,
@@ -117,19 +120,6 @@ class QuizService @Autowired constructor(
 
         return completionRepo.findAll(pageWithMaxTenSortedByCompletionDesc)
             .map { it?.toDomain() }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun <T> logExecutionTimeWithMessage(
-        actionDescription: String,
-        block: () -> T,
-    ): T {
-        val start = Clock.System.now()
-        val result = block.invoke()
-        val duration = (Clock.System.now() - start).inWholeMilliseconds
-        logger.info("$actionDescription $duration millisecond(s)")
-
-        return result
     }
 
     private fun addInitialQuiz(userDetails: UserDetails) = addQuiz(
