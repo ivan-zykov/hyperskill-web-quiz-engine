@@ -53,6 +53,7 @@ private val userCredentials = UserCredentialsDTO(
 class ControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val quizzesRepository: CrudQuizzesRepository,
+    private val completionsRepo: CompletionsOfQuizRepository,
     private val mapper: ObjectMapper,
     private val userRepo: AppUserRepository,
     private val passEncoder: PasswordEncoder,
@@ -61,6 +62,7 @@ class ControllerTest @Autowired constructor(
 
     @BeforeEach
     fun reset() {
+        completionsRepo.deleteAll()
         quizzesRepository.deleteAll()
 
         userRepo.deleteAll()
@@ -252,11 +254,11 @@ class ControllerTest @Autowired constructor(
                 content { contentType(MediaType.APPLICATION_JSON) }
                 jsonPath("$.totalPages") { value(1) }
                 jsonPath("$.totalElements") { value(2) }
-                jsonPath("$.content[0].id") { value(1) }
+                jsonPath("$.content[0].id") { isNumber() }
                 jsonPath("$.content[0].title") { value(quiz.title) }
                 jsonPath("$.content[0].text") { value(TEXT) }
                 jsonPath("$.content[0].options[0]") { value(OPTION) }
-                jsonPath("$.content[1].id") { value(2) }
+                jsonPath("$.content[1].id") { isNumber() }
                 jsonPath("$.content[1].title") { containsString(TITLE) }
                 jsonPath("$.content[1].text") { value(TEXT) }
                 jsonPath("$.content[1].options[0]") { value(OPTION) }

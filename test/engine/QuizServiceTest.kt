@@ -11,12 +11,18 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 
 private const val USERNAME = "test@user.com"
 private const val PASSWORD = "testPass"
+
+private const val dateTimeString = "2026-01-01T10:00:00Z"
 
 @DataJpaTest
 @Import(PasswordEncoderConfig::class)
@@ -25,15 +31,25 @@ class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
     crudQuizRepo: CrudQuizzesRepository,
     jpaQuizRepo: JpaQuizzesRepository,
-    completionRepo: CompletionsOfQuizRepository,
+    private val completionRepo: CompletionsOfQuizRepository,
     passEncoder: PasswordEncoder,
 ) {
+    private val clockFixed: Clock = Clock.fixed(
+        Instant.parse(dateTimeString),
+        ZoneOffset.UTC
+    ).apply {
+        if (this == null) {
+            throw IllegalStateException("Failed to instantiate clock in ${QuizServiceTest::class}")
+        }
+    }
+
     private val sut = QuizService(
         userRepo,
         crudQuizRepo,
         jpaQuizRepo,
         completionRepo,
-        passEncoder
+        passEncoder,
+        clockFixed
     )
 
     private val user = AppUser(
@@ -167,26 +183,37 @@ class QuizServiceTest @Autowired constructor(
         )
     }
 
-    @TestFactory
-    fun `Solves quiz by ID with`() = listOf(
-        Triple(
-            "correct answer",
-            Answer(listOf(2)),
-            AnswerResult(success = true, feedback = CONGRATULATIONS)
-        ),
-        Triple(
-            "wrong answer",
-            Answer(listOf(0, 1)),
-            AnswerResult(success = false, feedback = WRONG_ANSWER)
+    @Test
+    fun `Solves quiz by ID with correct answer`() {
+        val addedQuiz = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails)
+
+        val answerResult = sut.solveQuizBy(id = addedQuiz.id, answer = Answer(listOf(2)))
+        val completion: CompletionOfQuizEntity = completionRepo.findAll().first()
+
+        assertAll(
+            { assertEquals(AnswerResult(success = true, feedback = CONGRATULATIONS), answerResult) },
+            { assertNotNull(completion.id) },
+            { assertEquals(addedQuiz.title, completion.quiz?.title) },
+            {
+                assertEquals(
+                    LocalDateTime.ofInstant(Instant.parse(dateTimeString), ZoneOffset.UTC),
+                    completion.completedAt
+                )
+            }
         )
-    ).map { (displayName, answer, expected) ->
-        dynamicTest(displayName) {
-            val addedQuizId = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails).id
+    }
 
-            val actual = sut.solveQuizBy(id = addedQuizId, answer = answer)
+    @Test
+    fun `Solves quiz by ID with wrong answer`() {
+        val addedQuizId = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails).id
 
-            assertEquals(expected, actual)
-        }
+        val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf(0, 1)))
+        val completions = completionRepo.findAll()
+
+        assertAll(
+            { assertEquals(AnswerResult(success = false, feedback = WRONG_ANSWER), actual) },
+            { assertTrue(completions.isEmpty()) }
+        )
     }
 
     @Test
@@ -196,8 +223,20 @@ class QuizServiceTest @Autowired constructor(
 
         val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf()))
 
-        assertEquals(true, actual.success)
-        assertEquals(CONGRATULATIONS, actual.feedback)
+        assertAll(
+            { assertEquals(true, actual.success) },
+            { assertEquals(CONGRATULATIONS, actual.feedback) }
+        )
+    }
+
+    @Test
+    fun `Solving non-existing quiz throws`() {
+        val quizId = 1
+
+        val exception = assertThrows<QuizNotFoundException> {
+            sut.solveQuizBy(id = QuizId(quizId), answer = Answer(listOf()))
+        }
+        assertEquals("Error. Quiz with ID: $quizId does not exist.", exception.message)
     }
 
     @Test
