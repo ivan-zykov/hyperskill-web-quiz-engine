@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -93,19 +94,24 @@ class QuizService @Autowired constructor(
         userRepo.save(newUser)
     }
 
+    @Transactional
     fun deleteQuizBy(
         id: QuizId,
         userDetails: UserDetails
     ) {
-        val quiz = jpaQuizRepo.findById(id.value.toLong())
+        val quizEntity = jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
-            .toDomain()
+        val quiz = quizEntity.toDomain()
 
         if (userDetails.username.equals(quiz.authorUsername).not()) {
             throw AccessDeniedException(
                 "Error. Username ${userDetails.username} doesn't math the author's username of quiz with ID ${id.value}."
             )
         }
+
+        val completions = completionRepo.findByQuiz(quizEntity)
+            .map { it.toDomain() }
+        completions.forEach { completionRepo.deleteById(it.id) }
 
         jpaQuizRepo.deleteById(id.value.toLong())
     }

@@ -256,12 +256,16 @@ class QuizServiceTest @Autowired constructor(
 
     @Test
     fun `Deletes quiz of the same author`() {
-        sut.addQuiz(newQuiz1, userDetails)
-        val quiz = sut.getAllQuizzesPaginated(0).first()
+        val quiz = sut.addQuiz(newQuiz1, userDetails)
+        val answer = sut.solveQuizBy(id = quiz.id, answer = Answer(listOf(2)))
+        assertTrue(answer.success)
 
-        sut.deleteQuizBy(quiz.id, userDetails)
+        sut.deleteQuizBy(id = quiz.id, userDetails = userDetails)
 
-        assertTrue { sut.getAllQuizzesPaginated(0).isEmpty }
+        assertAll(
+            { assertTrue(sut.getAllQuizzesPaginated(0).isEmpty) },
+            { assertTrue(completionRepo.findAll().isEmpty()) }
+        )
     }
 
     @Test
