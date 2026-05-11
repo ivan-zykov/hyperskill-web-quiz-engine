@@ -52,7 +52,7 @@ private val userCredentials = UserCredentialsDTO(
 @ActiveProfiles("test")
 class ControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
-    private val quizzesRepository: CrudQuizzesRepository,
+    private val quizzesRepository: JpaQuizzesRepository,
     private val completionsRepo: CompletionsOfQuizRepository,
     private val mapper: ObjectMapper,
     private val userRepo: AppUserRepository,

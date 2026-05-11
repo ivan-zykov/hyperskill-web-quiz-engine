@@ -18,7 +18,6 @@ private const val WRONG_ANSWER = "Wrong answer! Please, try again."
 @Service
 class QuizService @Autowired constructor(
     private val userRepo: AppUserRepository,
-    private val quizRepo: CrudQuizzesRepository,
     private val jpaQuizRepo: JpaQuizzesRepository,
     private val completionRepo: CompletionsOfQuizRepository,
     private val passwordEncoder: PasswordEncoder,
@@ -44,11 +43,11 @@ class QuizService @Autowired constructor(
 
         val entity = newQuiz.toEntity(user)
 
-        return quizRepo.save(entity).toDomain()
+        return jpaQuizRepo.save(entity).toDomain()
     }
 
     fun getQuizBy(id: QuizId): Quiz =
-        quizRepo.findById(id.value.toLong())
+        jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
             .toDomain()
 
@@ -98,7 +97,7 @@ class QuizService @Autowired constructor(
         id: QuizId,
         userDetails: UserDetails
     ) {
-        val quiz = quizRepo.findById(id.value.toLong())
+        val quiz = jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
             .toDomain()
 
@@ -108,7 +107,7 @@ class QuizService @Autowired constructor(
             )
         }
 
-        quizRepo.deleteById(id.value.toLong())
+        jpaQuizRepo.deleteById(id.value.toLong())
     }
 
     fun getCompletionsOfQuizBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {

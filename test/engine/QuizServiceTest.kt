@@ -29,7 +29,6 @@ private const val dateTimeString = "2026-01-01T10:00:00Z"
 @ActiveProfiles("test")
 class QuizServiceTest @Autowired constructor(
     private val userRepo: AppUserRepository,
-    crudQuizRepo: CrudQuizzesRepository,
     jpaQuizRepo: JpaQuizzesRepository,
     private val completionRepo: CompletionsOfQuizRepository,
     passEncoder: PasswordEncoder,
@@ -45,7 +44,6 @@ class QuizServiceTest @Autowired constructor(
 
     private val sut = QuizService(
         userRepo,
-        crudQuizRepo,
         jpaQuizRepo,
         completionRepo,
         passEncoder,
