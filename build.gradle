@@ -61,6 +61,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'junit:junit:4.13.2'                        // JUnit 4 API (for Hyperskill's integration tests)
+    testImplementation 'com.ninja-squad:springmockk:5.0.1'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'       // Run JUnit 4 on JUnit Platform. Version comes from the BOM
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'   // Helpful for Gradle/IDE runs. Version comes from the BOM
 }
@@ -78,5 +79,6 @@ tasks.withType(KotlinCompile) {
 
 test {
     jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+    jvmArgs '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED'
     useJUnitPlatform()
 }
