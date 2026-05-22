@@ -47,11 +47,13 @@ class QuizService @Autowired constructor(
         return jpaQuizRepo.save(entity).toDomain()
     }
 
+    @Transactional(readOnly = true)
     fun getQuizBy(id: QuizId): Quiz =
         jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
             .toDomain()
 
+    @Transactional(readOnly = true)
     fun getAllQuizzesPaginated(pageNumber: Int): Page<Quiz> {
         val pageWithMaxTenQuizzes: Pageable = PageRequest.of(pageNumber, 10)
 
@@ -116,6 +118,7 @@ class QuizService @Autowired constructor(
         jpaQuizRepo.deleteById(id.value.toLong())
     }
 
+    @Transactional(readOnly = true)
     fun getCompletionsOfQuizBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
         val pageWithMaxTenSortedByCompletionDesc: Pageable = PageRequest.of(
             pageNumber,
