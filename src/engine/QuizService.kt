@@ -119,15 +119,18 @@ class QuizService @Autowired constructor(
     }
 
     @Transactional(readOnly = true)
-    fun getCompletionsOfQuizBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
+    fun getCompletionsOfQuizPaginatedBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
         val pageWithMaxTenSortedByCompletionDesc: Pageable = PageRequest.of(
             pageNumber,
             10,
             Sort.by("completedAt").descending()
         )
 
-        return completionRepo.findAll(pageWithMaxTenSortedByCompletionDesc)
-            .map { it?.toDomain() }
+        val quizEntity: QuizEntity = jpaQuizRepo.findById(id.value.toLong())
+            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+
+        return completionRepo.findByQuiz(quizEntity, pageWithMaxTenSortedByCompletionDesc)
+            .map { it.toDomain() }
     }
 
     private fun addInitialQuiz(userDetails: UserDetails) = addQuiz(

@@ -282,4 +282,38 @@ class QuizServiceTest @Autowired constructor(
             exception.message
         )
     }
+
+    @Test
+    fun `Gets no completions for non-existing quiz`() {
+        val completions = sut.getCompletionsOfQuizPaginatedBy(QuizId(99), 1)
+
+        assertTrue(completions.isEmpty)
+    }
+
+    @Test
+    fun `Gets no completions for existing quiz without completions`() {
+        val quiz = sut.addQuiz(newQuiz1, userDetails)
+
+        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 1)
+
+        assertTrue(completions.isEmpty)
+    }
+
+    @Test
+    fun `Gets two completions`() {
+        val quiz = sut.addQuiz(newQuiz1, userDetails)
+        val correctAnswer = Answer(listOf(2))
+        sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        sut.solveQuizBy(quiz.id, answer = correctAnswer)
+
+        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 1)
+
+        assertAll(
+            { assertEquals(10, completions.size) },
+            { assertEquals(1, completions.totalPages) },
+            { assertEquals(2, completions.totalElements) },
+            { assertEquals(quiz.id.value.toLong(), completions.content[0].id) },
+            { assertEquals(quiz.id.value.toLong(), completions.content[1].id) }
+        )
+    }
 }
