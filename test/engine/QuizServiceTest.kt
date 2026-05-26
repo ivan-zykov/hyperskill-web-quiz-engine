@@ -15,6 +15,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import kotlin.check
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
@@ -284,10 +285,10 @@ class QuizServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `Gets no completions for non-existing quiz`() {
-        val completions = sut.getCompletionsOfQuizPaginatedBy(QuizId(99), 1)
-
-        assertTrue(completions.isEmpty)
+    fun `Getting completions for non-existing quiz throws`() {
+        assertThrows<QuizNotFoundException> {
+            sut.getCompletionsOfQuizPaginatedBy(QuizId(99), 1)
+        }
     }
 
     @Test
@@ -303,17 +304,19 @@ class QuizServiceTest @Autowired constructor(
     fun `Gets two completions`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
         val correctAnswer = Answer(listOf(2))
-        sut.solveQuizBy(quiz.id, answer = correctAnswer)
-        sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        val result1 = sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        check(result1.success)
+        val result2 = sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        check(result2.success)
 
-        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 1)
+        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 0)
 
         assertAll(
             { assertEquals(10, completions.size) },
             { assertEquals(1, completions.totalPages) },
             { assertEquals(2, completions.totalElements) },
-            { assertEquals(quiz.id.value.toLong(), completions.content[0].id) },
-            { assertEquals(quiz.id.value.toLong(), completions.content[1].id) }
+            { assertEquals(quiz.id.value, completions.content[0].quiz.id.value) },
+            { assertEquals(quiz.id.value, completions.content[1].quiz.id.value) }
         )
     }
 }
