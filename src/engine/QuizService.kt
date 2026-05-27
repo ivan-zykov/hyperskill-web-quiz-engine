@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -63,7 +64,8 @@ class QuizService @Autowired constructor(
 
     fun solveQuizBy(
         id: QuizId,
-        answer: Answer
+        answer: Answer,
+        userDetails: UserDetails
     ): AnswerResult {
         val quizEntity = jpaQuizRepo.findById(id.value.toLong())
             .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
@@ -72,8 +74,12 @@ class QuizService @Autowired constructor(
         val (success, feedback) = quiz.check(answer)
 
         if (success) {
+            val user = userRepo.findByUsername(userDetails.username)
+                ?: throw UsernameNotFoundException("Username ${userDetails.username} not found")
+
             val completionEntity = CompletionOfQuizEntity()
             completionEntity.quiz = quizEntity
+            completionEntity.user = user
             completionEntity.completedAt = LocalDateTime.now(clock)
             completionRepo.save(completionEntity)
         }
@@ -176,5 +182,6 @@ private fun QuizEntity.toDomain() = Quiz(
 private fun CompletionOfQuizEntity.toDomain() = CompletionOfQuiz(
     id = requireNotNull(this.id) { "Error. CompletionOfQuizEntity.id must not be null" },
     quiz = requireNotNull(this.quiz) { "Error. CompletionOfQuizEntity.quiz must not be null" }.toDomain(),
+    userName = requireNotNull(this.user?.username) { "Error. Error. CompletionOfQuizEntity.user.username must not be null"},
     completedAt = requireNotNull(this.completedAt) { "Error. CompletionOfQuizEntity.completedAt must not be null" },
 )

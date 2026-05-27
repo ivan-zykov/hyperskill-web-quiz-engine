@@ -70,7 +70,7 @@ class QuizServiceTransactionTest @Autowired constructor(
     @Test
     fun `Deleting quiz rolls back when final delete fails`() {
         val quiz = sut.addQuiz(newQuiz = newQuiz, userDetails = userDetails)
-        val result = sut.solveQuizBy(id = quiz.id, answer = Answer(listOf(2)))
+        val result = sut.solveQuizBy(id = quiz.id, answer = Answer(listOf(2)), userDetails = userDetails)
         check(result.success) { "Failed to solve quiz in test" }
 
         every { spyQuizRepo.deleteById(any()) } throws IllegalStateException("Trigger transaction rollback")

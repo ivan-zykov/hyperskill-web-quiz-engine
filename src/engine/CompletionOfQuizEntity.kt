@@ -15,6 +15,10 @@ class CompletionOfQuizEntity {
     @JoinColumn(name = "quizId")
     var quiz: QuizEntity? = null
 
+    @ManyToOne
+    @JoinColumn(name = "userCompleted")
+    var user: AppUser? = null
+
     @Column(name = "completedAt")
     var completedAt: LocalDateTime? = null
 }

@@ -79,8 +79,9 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     fun solveQuizBy(
         @PathVariable id: QuizId,
         @RequestBody answer: AnswerDto,
+        @AuthenticationPrincipal userDetails: UserDetails,
     ): ResponseEntity<ResultDto> {
-        val result = quizService.solveQuizBy(id, answer.toDomain())
+        val result = quizService.solveQuizBy(id, answer.toDomain(), userDetails)
 
         return ResponseEntity
             .ok()

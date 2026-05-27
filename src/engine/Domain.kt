@@ -50,5 +50,6 @@ data class UserCredentials(
 class CompletionOfQuiz(
     val id: Long,
     val quiz: Quiz,
+    val userName: String,
     val completedAt: LocalDateTime,
 )

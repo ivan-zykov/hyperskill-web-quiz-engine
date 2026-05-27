@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import java.time.Clock
@@ -186,7 +187,11 @@ class QuizServiceTest @Autowired constructor(
     fun `Solves quiz by ID with correct answer`() {
         val addedQuiz = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails)
 
-        val answerResult = sut.solveQuizBy(id = addedQuiz.id, answer = Answer(listOf(2)))
+        val answerResult = sut.solveQuizBy(
+            id = addedQuiz.id,
+            answer = Answer(listOf(2)),
+            userDetails = userDetails
+        )
         val completion: CompletionOfQuizEntity = completionRepo.findAll().first()
 
         assertAll(
@@ -206,7 +211,11 @@ class QuizServiceTest @Autowired constructor(
     fun `Solves quiz by ID with wrong answer`() {
         val addedQuizId = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails).id
 
-        val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf(0, 1)))
+        val actual = sut.solveQuizBy(
+            id = addedQuizId,
+            answer = Answer(listOf(0, 1)),
+            userDetails = userDetails
+        )
         val completions = completionRepo.findAll()
 
         assertAll(
@@ -220,7 +229,11 @@ class QuizServiceTest @Autowired constructor(
         val quizWithNullAnswer = newQuiz1.copy(answer = null)
         val addedQuizId = sut.addQuiz(newQuiz = quizWithNullAnswer, userDetails = userDetails).id
 
-        val actual = sut.solveQuizBy(id = addedQuizId, answer = Answer(listOf()))
+        val actual = sut.solveQuizBy(
+            id = addedQuizId,
+            answer = Answer(listOf()),
+            userDetails = userDetails
+        )
 
         assertAll(
             { assertEquals(true, actual.success) },
@@ -233,9 +246,27 @@ class QuizServiceTest @Autowired constructor(
         val quizId = 1
 
         val exception = assertThrows<QuizNotFoundException> {
-            sut.solveQuizBy(id = QuizId(quizId), answer = Answer(listOf()))
+            sut.solveQuizBy(id = QuizId(quizId), answer = Answer(listOf()), userDetails = userDetails)
         }
         assertEquals("Error. Quiz with ID: $quizId does not exist.", exception.message)
+    }
+
+    @Test
+    fun `Solving quiz with user not found throws`() {
+        val addedQuizId = sut.addQuiz(newQuiz = newQuiz1, userDetails = userDetails).id
+        val otherUserDetails = AppUserAdapter(otherUser)
+
+        val exception = assertThrows<UsernameNotFoundException> {
+            sut.solveQuizBy(
+                id = addedQuizId,
+                answer = Answer(listOf(2)),
+                userDetails = otherUserDetails
+            )
+        }
+        assertEquals(
+            "Username ${otherUserDetails.username} not found",
+            exception.message
+        )
     }
 
     @Test
@@ -258,7 +289,7 @@ class QuizServiceTest @Autowired constructor(
     @Test
     fun `Deletes quiz of the same author`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
-        val answer = sut.solveQuizBy(id = quiz.id, answer = Answer(listOf(2)))
+        val answer = sut.solveQuizBy(id = quiz.id, answer = Answer(listOf(2)), userDetails = userDetails)
         assertTrue(answer.success)
 
         sut.deleteQuizBy(id = quiz.id, userDetails = userDetails)
@@ -304,9 +335,9 @@ class QuizServiceTest @Autowired constructor(
     fun `Gets two completions`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
         val correctAnswer = Answer(listOf(2))
-        val result1 = sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        val result1 = sut.solveQuizBy(quiz.id, answer = correctAnswer, userDetails)
         check(result1.success)
-        val result2 = sut.solveQuizBy(quiz.id, answer = correctAnswer)
+        val result2 = sut.solveQuizBy(quiz.id, answer = correctAnswer, userDetails)
         check(result2.success)
 
         val completions = sut.getTenCompletionsPaginatedSortedDescBy(quiz.id, 0)
