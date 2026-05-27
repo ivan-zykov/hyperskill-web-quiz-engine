@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
+private const val USERNAME_NOT_FOUND_TEMPLATE = "Username %s not found"
 
 @Service
 class QuizService @Autowired constructor(
@@ -75,7 +76,7 @@ class QuizService @Autowired constructor(
 
         if (success) {
             val user = userRepo.findByUsername(userDetails.username)
-                ?: throw UsernameNotFoundException("Username ${userDetails.username} not found")
+                ?: throw UsernameNotFoundException(USERNAME_NOT_FOUND_TEMPLATE.format(userDetails.username))
 
             val completionEntity = CompletionOfQuizEntity()
             completionEntity.quiz = quizEntity
@@ -139,6 +140,20 @@ class QuizService @Autowired constructor(
             .map { it.toDomain() }
     }
 
+    @Transactional(readOnly = true)
+    fun getAllCompletionsPaginatedSortedByCompletedAtDescBy(
+        userDetails: UserDetails,
+        pageNumber: Int
+    ): Page<CompletionOfQuiz> {
+        val user = userRepo.findByUsername(userDetails.username)
+            ?: throw UsernameNotFoundException(USERNAME_NOT_FOUND_TEMPLATE.format(userDetails.username))
+
+        val pageWithMaxTen: Pageable = PageRequest.of(pageNumber, 10)
+
+        return completionRepo.findByUserOrderByCompletedAtDescIdAsc(user, pageWithMaxTen)
+            .map { it.toDomain() }
+    }
+
     private fun addInitialQuiz(userDetails: UserDetails) = addQuiz(
         NewQuiz(
             title = "The Java Logo",
@@ -182,6 +197,6 @@ private fun QuizEntity.toDomain() = Quiz(
 private fun CompletionOfQuizEntity.toDomain() = CompletionOfQuiz(
     id = requireNotNull(this.id) { "Error. CompletionOfQuizEntity.id must not be null" },
     quiz = requireNotNull(this.quiz) { "Error. CompletionOfQuizEntity.quiz must not be null" }.toDomain(),
-    userName = requireNotNull(this.user?.username) { "Error. Error. CompletionOfQuizEntity.user.username must not be null"},
+    userName = requireNotNull(this.user?.username) { "Error. Error. CompletionOfQuizEntity.user.username must not be null" },
     completedAt = requireNotNull(this.completedAt) { "Error. CompletionOfQuizEntity.completedAt must not be null" },
 )

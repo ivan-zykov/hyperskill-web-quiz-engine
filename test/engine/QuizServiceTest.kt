@@ -316,14 +316,14 @@ class QuizServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `Getting completions for non-existing quiz throws`() {
+    fun `Getting completions by non-existing quiz throws`() {
         assertThrows<QuizNotFoundException> {
             sut.getTenCompletionsPaginatedSortedDescBy(QuizId(99), 1)
         }
     }
 
     @Test
-    fun `Gets no completions for existing quiz without completions`() {
+    fun `Gets no completions by existing quiz without completions`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
 
         val completions = sut.getTenCompletionsPaginatedSortedDescBy(quiz.id, 1)
@@ -332,7 +332,7 @@ class QuizServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `Gets two completions`() {
+    fun `Gets two completions by quiz`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
         val correctAnswer = Answer(listOf(2))
         val result1 = sut.solveQuizBy(quiz.id, answer = correctAnswer, userDetails)
@@ -348,6 +348,100 @@ class QuizServiceTest @Autowired constructor(
             { assertEquals(2, completions.totalElements) },
             { assertEquals(quiz.id.value, completions.content[0].quiz.id.value) },
             { assertEquals(quiz.id.value, completions.content[1].quiz.id.value) }
+        )
+    }
+
+    @Test
+    fun `Getting completions by user not found throws`() {
+        val otherUserDetails = AppUserAdapter(otherUser)
+
+        val exception = assertThrows<UsernameNotFoundException> {
+            sut.getAllCompletionsPaginatedSortedByCompletedAtDescBy(otherUserDetails, 0)
+        }
+
+        assertEquals(
+            "Username ${otherUserDetails.username} not found",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `Gets zero completions for existing user without completions`() {
+        val completions = sut.getAllCompletionsPaginatedSortedByCompletedAtDescBy(userDetails, 0)
+
+        assertTrue(completions.isEmpty)
+    }
+
+    @Test
+    fun `Gets paginated completions for user`() {
+        val newQuiz2 = newQuiz1.copy(title = "The Java Logo 2")
+        val quiz1 = sut.addQuiz(newQuiz1, userDetails)
+        val quiz2 = sut.addQuiz(newQuiz2, userDetails)
+        val otherEncodedUser = AppUser(
+            username = otherUser.username,
+            password = "encoded-${otherUser.password}"
+        )
+        userRepo.save(otherEncodedUser)
+        val otherUserDetails = AppUserAdapter(otherUser)
+        val correctAnswer = Answer(listOf(2))
+
+        repeat(6) {
+            val result = sut.solveQuizBy(quiz1.id, answer = correctAnswer, userDetails)
+            check(result.success)
+        }
+        repeat(5) {
+            val result = sut.solveQuizBy(quiz2.id, answer = correctAnswer, userDetails)
+            check(result.success)
+        }
+        repeat(2) {
+            val result = sut.solveQuizBy(quiz1.id, answer = correctAnswer, otherUserDetails)
+            check(result.success)
+        }
+
+        val completionsPage0 = sut.getAllCompletionsPaginatedSortedByCompletedAtDescBy(userDetails, 0)
+        val completionsPage1 = sut.getAllCompletionsPaginatedSortedByCompletedAtDescBy(userDetails, 1)
+        val expectedCompletedAt = LocalDateTime.ofInstant(Instant.parse(dateTimeString), ZoneOffset.UTC)
+        val expectedPage0QuizIds = listOf(
+            quiz1.id.value,
+            quiz1.id.value,
+            quiz1.id.value,
+            quiz1.id.value,
+            quiz1.id.value,
+            quiz1.id.value,
+            quiz2.id.value,
+            quiz2.id.value,
+            quiz2.id.value,
+            quiz2.id.value,
+        )
+        val expectedPage1QuizIds = listOf(quiz2.id.value)
+
+        assertAll(
+            { assertEquals(2, completionsPage0.totalPages) },
+            { assertEquals(11, completionsPage0.totalElements) },
+            { assertEquals(10, completionsPage0.size) },
+            { assertEquals(10, completionsPage0.content.size) },
+            { assertEquals(2, completionsPage1.totalPages) },
+            { assertEquals(11, completionsPage1.totalElements) },
+            { assertEquals(10, completionsPage1.size) },
+            { assertEquals(1, completionsPage1.content.size) },
+            { assertEquals(expectedPage0QuizIds, completionsPage0.content.map { it.quiz.id.value }) },
+            { assertEquals(expectedPage1QuizIds, completionsPage1.content.map { it.quiz.id.value }) },
+            { assertTrue(completionsPage0.content.all { it.userName == user.username }) },
+            { assertTrue(completionsPage1.content.all { it.userName == user.username }) },
+            {
+                assertTrue(
+                    completionsPage0.content.all {
+                        it.completedAt == expectedCompletedAt
+                    }
+                )
+            },
+            {
+                assertTrue(
+                    completionsPage1.content.all {
+                        it.completedAt == expectedCompletedAt
+                    }
+                )
+            }
         )
     }
 }
