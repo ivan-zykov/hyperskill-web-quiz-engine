@@ -287,7 +287,7 @@ class QuizServiceTest @Autowired constructor(
     @Test
     fun `Getting completions for non-existing quiz throws`() {
         assertThrows<QuizNotFoundException> {
-            sut.getCompletionsOfQuizPaginatedBy(QuizId(99), 1)
+            sut.getTenCompletionsPaginatedSortedDescBy(QuizId(99), 1)
         }
     }
 
@@ -295,7 +295,7 @@ class QuizServiceTest @Autowired constructor(
     fun `Gets no completions for existing quiz without completions`() {
         val quiz = sut.addQuiz(newQuiz1, userDetails)
 
-        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 1)
+        val completions = sut.getTenCompletionsPaginatedSortedDescBy(quiz.id, 1)
 
         assertTrue(completions.isEmpty)
     }
@@ -309,7 +309,7 @@ class QuizServiceTest @Autowired constructor(
         val result2 = sut.solveQuizBy(quiz.id, answer = correctAnswer)
         check(result2.success)
 
-        val completions = sut.getCompletionsOfQuizPaginatedBy(quiz.id, 0)
+        val completions = sut.getTenCompletionsPaginatedSortedDescBy(quiz.id, 0)
 
         assertAll(
             { assertEquals(10, completions.size) },

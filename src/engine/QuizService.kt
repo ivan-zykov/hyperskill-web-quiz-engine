@@ -119,7 +119,7 @@ class QuizService @Autowired constructor(
     }
 
     @Transactional(readOnly = true)
-    fun getCompletionsOfQuizPaginatedBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
+    fun getTenCompletionsPaginatedSortedDescBy(id: QuizId, pageNumber: Int): Page<CompletionOfQuiz> {
         val pageWithMaxTenSortedByCompletionDesc: Pageable = PageRequest.of(
             pageNumber,
             10,
