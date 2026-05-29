@@ -88,6 +88,19 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
             .body(result.toDto())
     }
 
+    @GetMapping("/quizzes/completed")
+    fun getCompletionsBy(
+        @RequestParam(defaultValue = "0") page: Int,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<Page<CompletionOfQuizDto>> {
+        val completions =
+            quizService.getAllCompletionsPaginatedSortedByCompletedAtDescBy(userDetails, page)
+
+        return ResponseEntity
+            .ok()
+            .body(completions.map { it.toDto() })
+    }
+
     @PostMapping("/register")
     fun registerNewUser(@Valid @RequestBody newCredentials: UserCredentialsDTO) {
         quizService.registerNewUser(newCredentials.toDomain())
@@ -118,4 +131,9 @@ private fun Quiz.toDto() = QuizOutDto(
     title = title,
     text = text,
     options = options,
+)
+
+private fun CompletionOfQuiz.toDto() = CompletionOfQuizDto(
+    id = this.quiz.id.value.toLong(),
+    completedAt = this.completedAt
 )

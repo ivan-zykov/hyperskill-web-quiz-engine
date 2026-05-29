@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import java.time.LocalDateTime
 
 class QuizOutDto(
     val id: QuizId,
@@ -32,9 +33,14 @@ class AnswerDto(val answer: List<Int>)
 
 class UserCredentialsDTO(
     @field:NotNull(message = "Field email must be not null")
-    @field:Email(regexp = ".+@.+\\..+",message = "Field email must be a valid email")
+    @field:Email(regexp = ".+@.+\\..+", message = "Field email must be a valid email")
     val email: String,
 
     @field:Size(min = 5, message = "Field password must have at least five characters")
     val password: String,
+)
+
+class CompletionOfQuizDto(
+    val id: Long,
+    val completedAt: LocalDateTime,
 )
