@@ -16,7 +16,8 @@ import java.time.LocalDateTime
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
-private const val USERNAME_NOT_FOUND_TEMPLATE = "Username %s not found"
+private const val USERNAME_NOT_FOUND_TEMPLATE = "Username %s not found."
+private const val QUIZ_NOT_FOUND_TEMPLATE = "Quiz with ID %s not found."
 
 @Service
 class QuizService @Autowired constructor(
@@ -42,7 +43,7 @@ class QuizService @Autowired constructor(
 
     fun addQuiz(newQuiz: NewQuiz, userDetails: UserDetails): Quiz {
         val user = userRepo.findByUsername(userDetails.username)
-            ?: throw RuntimeException("Server error. User ${userDetails.username} was not found.")
+            ?: throw UsernameNotFoundException(USERNAME_NOT_FOUND_TEMPLATE.format(userDetails.username))
 
         val entity = newQuiz.toEntity(user)
 
@@ -52,7 +53,7 @@ class QuizService @Autowired constructor(
     @Transactional(readOnly = true)
     fun getQuizBy(id: QuizId): Quiz =
         jpaQuizRepo.findById(id.value.toLong())
-            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .orElseThrow { QuizNotFoundException(QUIZ_NOT_FOUND_TEMPLATE.format(id.value)) }
             .toDomain()
 
     @Transactional(readOnly = true)
@@ -69,7 +70,7 @@ class QuizService @Autowired constructor(
         userDetails: UserDetails
     ): AnswerResult {
         val quizEntity = jpaQuizRepo.findById(id.value.toLong())
-            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .orElseThrow { QuizNotFoundException(QUIZ_NOT_FOUND_TEMPLATE.format(id.value)) }
         val quiz = quizEntity.toDomain()
 
         val (success, feedback) = quiz.check(answer)
@@ -109,7 +110,7 @@ class QuizService @Autowired constructor(
         userDetails: UserDetails
     ) {
         val quizEntity = jpaQuizRepo.findById(id.value.toLong())
-            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .orElseThrow { QuizNotFoundException(QUIZ_NOT_FOUND_TEMPLATE.format(id.value)) }
         val quiz = quizEntity.toDomain()
 
         if (userDetails.username.equals(quiz.authorUsername).not()) {
@@ -134,7 +135,7 @@ class QuizService @Autowired constructor(
         )
 
         val quizEntity: QuizEntity = jpaQuizRepo.findById(id.value.toLong())
-            .orElseThrow { QuizNotFoundException("Error. Quiz with ID: ${id.value} does not exist.") }
+            .orElseThrow { QuizNotFoundException(QUIZ_NOT_FOUND_TEMPLATE.format(id.value)) }
 
         return completionRepo.findByQuiz(quizEntity, pageWithMaxTenSortedByCompletionDesc)
             .map { it.toDomain() }
