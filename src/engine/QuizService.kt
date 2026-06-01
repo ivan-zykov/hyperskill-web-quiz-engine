@@ -16,8 +16,8 @@ import java.time.LocalDateTime
 
 private const val CONGRATULATIONS = "Congratulations, you're right!"
 private const val WRONG_ANSWER = "Wrong answer! Please, try again."
-private const val USERNAME_NOT_FOUND_TEMPLATE = "Username %s not found."
-private const val QUIZ_NOT_FOUND_TEMPLATE = "Quiz with ID %s not found."
+private const val USERNAME_NOT_FOUND_TEMPLATE = "Error. Username %s not found."
+private const val QUIZ_NOT_FOUND_TEMPLATE = "Error. Quiz with ID %s not found."
 
 @Service
 class QuizService @Autowired constructor(

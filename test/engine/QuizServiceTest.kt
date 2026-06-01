@@ -129,7 +129,7 @@ class QuizServiceTest @Autowired constructor(
             sut.addQuiz(newQuiz = newQuiz1, userDetails = otherUserDetails)
         }
         assertEquals(
-            "Username ${otherUserDetails.username} not found.",
+            "Error. Username ${otherUserDetails.username} not found.",
             exception.message
         )
     }
@@ -248,7 +248,7 @@ class QuizServiceTest @Autowired constructor(
         val exception = assertThrows<QuizNotFoundException> {
             sut.solveQuizBy(id = QuizId(quizId), answer = Answer(listOf()), userDetails = userDetails)
         }
-        assertEquals("Quiz with ID $quizId not found.", exception.message)
+        assertEquals("Error. Quiz with ID $quizId not found.", exception.message)
     }
 
     @Test
@@ -264,7 +264,7 @@ class QuizServiceTest @Autowired constructor(
             )
         }
         assertEquals(
-            "Username ${otherUserDetails.username} not found.",
+            "Error. Username ${otherUserDetails.username} not found.",
             exception.message
         )
     }
@@ -360,7 +360,7 @@ class QuizServiceTest @Autowired constructor(
         }
 
         assertEquals(
-            "Username ${otherUserDetails.username} not found.",
+            "Error. Username ${otherUserDetails.username} not found.",
             exception.message
         )
     }
