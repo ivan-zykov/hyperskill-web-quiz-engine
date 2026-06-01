@@ -67,8 +67,8 @@ class QuizEngineController @Autowired constructor(private val quizService: QuizS
     }
 
     @GetMapping("/quizzes")
-    fun getAllQuizzes(@RequestParam(defaultValue = "0") pageNumber: Int): ResponseEntity<Page<QuizOutDto>> {
-        val quizzes = quizService.getAllQuizzesPaginated(pageNumber)
+    fun getAllQuizzes(@RequestParam(defaultValue = "0") page: Int): ResponseEntity<Page<QuizOutDto>> {
+        val quizzes = quizService.getAllQuizzesPaginated(page)
 
         return ResponseEntity
             .ok()
